@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v**"
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -218,7 +219,7 @@ jobs:
           --platform linux/arm64 \
           -v ${{ github.workspace }}:/build -w /build \
           rust:latest \
-          bash -c 'rustc --version && cargo test --verbose --workspace --all-features && cargo build --verbose --workspace'
+          bash -c 'rustc --version && cargo test --verbose --workspace --all-features && cargo build --verbose --workspace --release'
       - name: Zip
         uses: papeloto/action-zip@v1
         with:
@@ -232,7 +233,7 @@ jobs:
           asset_paths: '["aarch64-unknown-linux-gnu.zip"]'
 
   aarch64-apple-darwin:
-    needs: [ release ]
+    needs: [release]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -258,7 +259,7 @@ jobs:
       - name: Zip
         uses: papeloto/action-zip@v1
         with:
-          files: ./target/aarch64-apple-darwin/release/allot
+          files: ./target/release/allot
           dest: aarch64-apple-darwin.zip
       - name: Upload to release
         uses: alexellis/upload-assets@0.3.0
