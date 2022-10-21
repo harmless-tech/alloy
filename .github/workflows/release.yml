@@ -8,6 +8,8 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+# TODO: Push to crates.io
+
 jobs:
   clippy-fmt:
     runs-on: ubuntu-latest
@@ -25,7 +27,7 @@ jobs:
       - name: Rust Version
         run: rustc --version
       - name: Clippy Check # Clippy
-        run: cargo clippy --all-targets --all-features --verbose --workspace -- -D warnings
+        run: cargo clippy --all-targets --all-features --verbose --workspace --release -- -D warnings
       - uses: actions-rust-lang/setup-rust-toolchain@v1 # Fmt
         with:
           toolchain: nightly

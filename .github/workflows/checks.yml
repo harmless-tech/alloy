@@ -10,19 +10,20 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  fmt-check:
+  fmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: nightly
+          cache: false
           components: |
             rustfmt
       - name: Rustfmt Check
         run: cargo +nightly fmt --check
 
-  clippy-check:
+  clippy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -32,7 +33,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-clippy-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-x86_64-unknown-linux-gnu-${{ hashFiles('**/Cargo.lock') }}
       - name: Update Rust
         run: rustup update
       - name: Rust Version
