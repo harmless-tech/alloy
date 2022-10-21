@@ -1,0 +1,157 @@
+name: Rust Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  x86_64-unknown-linux-gnu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-x86_64-unknown-linux-gnu-${{ hashFiles('**/Cargo.lock') }}
+      - name: Update Rust
+        run: rustup update
+      - name: Rust Version
+        run: rustc --version
+      - name: Run tests
+        run: cargo test --verbose --workspace --all-features
+      - name: Build
+        run: cargo build --verbose --workspace
+      - name: Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: x86_64-unknown-linux-gnu
+          path: |
+            target/debug/allot
+
+  x86_64-apple-darwin:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-x86_64-apple-darwin-${{ hashFiles('**/Cargo.lock') }}
+      - name: Update Rust
+        run: rustup update
+      - name: Rust Version
+        run: rustc --version
+      - name: Run tests
+        run: cargo test --verbose --workspace --all-features
+      - name: Build
+        run: cargo build --verbose --workspace
+      - name: Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: x86_64-apple-darwin
+          path: |
+            target/debug/allot
+
+  x86_64-pc-windows-msvc:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-x86_64-pc-windows-msvc-${{ hashFiles('**/Cargo.lock') }}
+      - name: Update Rust
+        run: rustup update
+      - name: Rust Version
+        run: rustc --version
+      - name: Run tests
+        run: cargo test --verbose --workspace --all-features
+      - name: Build
+        run: cargo build --verbose --workspace
+      - name: Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: x86_64-pc-windows-msvc
+          path: |
+            target/debug/allot.exe
+
+  aarch64-unknown-linux-gnu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            cargo-cache
+            target
+          key: ${{ runner.os }}-cargo-aarch64-unknown-linux-gnu-${{ hashFiles('**/Cargo.lock') }}
+      - name: Docker Setup QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Create Directory
+        run: |
+          mkdir -p cargo-cache
+          mkdir -p cargo-cache/git
+          mkdir -p cargo-cache/registry
+      - name: Docker CMD
+        run: |
+          docker run --rm \
+          --platform linux/arm64 \
+          -v ${{ github.workspace }}/cargo-cache/registry:/usr/local/cargo/registry \
+          -v ${{ github.workspace }}/cargo-cache/git:/usr/local/cargo/git \
+          -v ${{ github.workspace }}:/build -w /build \
+          rust:latest \
+          bash -c 'rustc --version && cargo test --verbose --workspace --all-features && cargo build --verbose --workspace'
+      - name: Permission fix
+        run: |
+          sudo chown -R $USER cargo-cache
+          sudo chown -R $USER target
+      - name: Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: aarch64-unknown-linux-gnu
+          path: |
+            target/debug/allot
+
+  aarch64-apple-darwin:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-aarch64-apple-darwin-${{ hashFiles('**/Cargo.lock') }}
+      - name: Update Rust
+        run: rustup update
+      - name: Rust Version
+        run: rustc --version
+      - name: Add Rust target
+        run: rustup target add aarch64-apple-darwin
+      - name: MacOS SDK
+        run: |
+          export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
+          export MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx --show-sdk-platform-version)
+      # Cannot test aarch64 MacOS binaries
+      - name: Build
+        run: cargo build --verbose --workspace --target=aarch64-apple-darwin
+      - name: Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: aarch64-apple-darwin
+          path: |
+            target/aarch64-apple-darwin/debug/allot
