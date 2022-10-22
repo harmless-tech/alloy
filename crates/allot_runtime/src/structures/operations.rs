@@ -11,13 +11,13 @@ impl Operation {
             Operation::Prim1(op) => {
                 let v = registers.own(regs[0]);
                 let t = op.resolve(v);
-                registers.insert(regs[0], t);
+                registers.load(regs[0], t);
             }
             Operation::Prim2(op) => {
                 let v1 = registers.copy(regs[0]);
                 let v2 = registers.copy(regs[1]);
                 let t = op.resolve(v1, v2);
-                registers.insert(regs[0], t);
+                registers.load(regs[0], t);
             }
         }
     }

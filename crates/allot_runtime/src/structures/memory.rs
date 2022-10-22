@@ -21,7 +21,7 @@ impl Registers {
         }
     }
 
-    pub fn insert(&mut self, register: Register, t: Type) {
+    pub fn load(&mut self, register: Register, t: Type) {
         let i = register as usize;
         if i >= 30 {
             panic!("{:?} is not a valid register.", register)
@@ -65,6 +65,17 @@ impl StackFrame {
         Self {
             stack: Vec::new(),
             isolated,
+        }
+    }
+
+    pub fn push(&mut self, t: Type) {
+        self.stack.push(t);
+    }
+
+    pub fn pop(&mut self) -> Type {
+        match self.stack.pop() {
+            None => panic!("Tried to pop from stack but it was empty."),
+            Some(v) => v,
         }
     }
 }

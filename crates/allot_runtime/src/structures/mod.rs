@@ -61,13 +61,13 @@ pub enum Instruction {
     Cast(RawType, Register),
 
     /// Loads a label value into the register.
-    Lea(Register),
-    /// Jumps to a label, depending on the operation.
-    Jmp(Option<Operation>, Type), // Type = Label || Register
+    Lea(Register, usize),
+    /// Jumps to a label, depending on the value in the register.
+    Jmp(Option<Register>, Type), // Type = Label || Register
     /// Pops the stack and jumps to that label.
     Ret,
 
-    /// Calls a function, functions get the current stack frame, the value in register 9, and access to the heap.
+    /// Calls a function, functions get the current stack frame, the number of args in register 9, and access to the heap.
     Call(usize),
 
     /// Exits the program with the int.
@@ -75,6 +75,8 @@ pub enum Instruction {
 
     /// Pushes the value in the register onto the stack in the current stack frame.
     Push(Register),
+    /// Pushes a copy of the value in the register onto the stack in the current stack frame.
+    PushCpy(Register),
     /// Pops the value on top of the stack into register or gets rid of it.
     Pop(Option<Register>),
     /// Pushes a new stack frame.

@@ -52,6 +52,7 @@ impl AllotRuntime {
             None => panic!("There is no instruction at {}", self.current),
             Some(i) => i,
         };
+        let mut next = self.current + 1;
 
         match instruction {
             Instruction::Nop => {}
@@ -67,15 +68,52 @@ impl AllotRuntime {
                     _ => t.copy(),
                 };
 
-                self.registers.insert(*reg, val);
+                self.registers.load(*reg, val);
             }
             Instruction::Cpy(reg1, reg2) => {
                 let val = self.registers.get(*reg2);
-                self.registers.insert(*reg1, val.copy())
+                self.registers.load(*reg1, val.copy())
             }
             Instruction::Cast(_, _) => {}
-            Instruction::Lea(_) => {}
-            Instruction::Jmp(_, _) => {}
+            Instruction::Lea(reg, label) => {
+                let val = match self.labels.get(*label) {
+                    None => panic!("Label {label} was not found."),
+                    Some(l) => *l,
+                };
+                self.registers.load(*reg, Type::Label(val));
+            }
+            Instruction::Jmp(opt_reg, label) => {
+                let label = match label {
+                    Type::Label(l) => *l,
+                    Type::Register(reg) => {
+                        let val = self.registers.get_mut(*reg);
+                        if let Type::Label(i) = val {
+                            *i
+                        }
+                        else {
+                            panic!("Jmp requires a Label Type.");
+                        }
+                    }
+                    _ => panic!("Jmp requires a Label Type."),
+                };
+
+                let jmp = match opt_reg {
+                    None => true,
+                    Some(reg) => {
+                        let val = self.registers.get_mut(*reg);
+                        if let Type::Boolean(i) = val {
+                            *i
+                        }
+                        else {
+                            panic!("Jmp requires a Boolean Type.");
+                        }
+                    }
+                };
+
+                if jmp {
+                    next = label;
+                }
+            }
             Instruction::Ret => {}
             Instruction::Call(_) => {}
             Instruction::Exit(t) => {
@@ -94,10 +132,42 @@ impl AllotRuntime {
                 };
                 return Some(i);
             }
-            Instruction::Push(_) => {}
-            Instruction::Pop(_) => {}
-            Instruction::PushFrame(_) => {}
-            Instruction::PopFrame => {}
+            Instruction::Push(reg) => {
+                let val = self.registers.own(*reg);
+                match self.stack_frames.last_mut() {
+                    None => panic!("No stack frames."),
+                    Some(frame) => {
+                        frame.push(val);
+                    }
+                }
+            }
+            Instruction::PushCpy(reg) => {
+                let val = self.registers.get(*reg);
+                match self.stack_frames.last_mut() {
+                    None => panic!("No stack frames."),
+                    Some(frame) => {
+                        frame.push(val.copy());
+                    }
+                }
+            }
+            Instruction::Pop(opt_reg) => {
+                let val = match self.stack_frames.last_mut() {
+                    None => panic!("No stack frames."),
+                    Some(frame) => frame.pop(),
+                };
+
+                match opt_reg {
+                    None => {}
+                    Some(reg) => self.registers.load(*reg, val),
+                }
+            }
+            Instruction::PushFrame(b) => self.stack_frames.push(StackFrame::new(*b)),
+            Instruction::PopFrame => {
+                let val = self.stack_frames.pop();
+                if val.is_none() || self.stack_frames.is_empty() {
+                    panic!("Could not pop stack frame.");
+                }
+            }
             Instruction::PushOnto(_) => {}
             Instruction::PopInto => {}
             Instruction::ThreadStart(_) => {}
@@ -130,7 +200,7 @@ impl AllotRuntime {
 
         // TODO: Instructions
 
-        self.current += 1;
+        self.current = next;
         None
     }
 
