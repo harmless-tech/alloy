@@ -39,27 +39,55 @@ pub enum Register {
     R27 = 27,
     R28 = 28,
     R29 = 29,
+
+    None = 255,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug)]
 pub enum Instruction {
+    /// Does nothing.
     Nop,
 
-    Cast(Register, RawType),
+    /// Does an operation on register(s).
+    Op(Operation, [Register; 2]),
 
-    Jmp(Operation),
+    /// Attempts the cast the value in the register to another type.
+    Cast(RawType, Register),
+
+    /// Loads a label value into the register.
+    Lea(Register),
+    /// Jumps to a label, depending on the operation.
+    Jmp(Operation, Type), // Type = Label || Register
+    /// Pops the stack and jumps to that label.
     Ret,
+
+    /// Calls a function, functions get the current stack frame, the value in register 9, and access to the heap.
+    Call(usize),
+
+    /// Exits the program with the int.
     Exit(Type),
 
+    /// Pushes the value in the register onto the stack in the current stack frame.
     Push(Register),
+    /// Pops the value on top of the stack into register or gets rid of it.
     Pop(Option<Register>),
+    /// Pushes a new stack frame.
     PushFrame,
+    /// Pops the top stack frame. Errors if it is the root stack frame.
     PopFrame,
+    /// Pushes onto the last stack frame.
+    PushOnto(Option<Register>),
+    /// Pops from the last stack frame and pushes it to the current one.
+    PopInto(Option<Register>),
 
-    // TODO:
-    ThreadStart,
-    ThreadEnd,
+    /// Takes the current stack frame (Errors if it is the root stack frame) and runs it on a new thread starting at the label.
+    /// Threads have their own registers and stack frames, the heap is shared between all threads.
+    /// Puts its handle into register 0.
+    ThreadStart(Type), // Type = Label || Register
+    /// Joins a thread and pushes its stack frame.
+    ThreadJoin(Register),
 
     #[cfg(debug_assertions)]
+    /// Assert that a register is equal to a type. (Debug builds only)
     Assert(Register, Type),
 }

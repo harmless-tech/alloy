@@ -1,6 +1,6 @@
-use crate::Register;
+use crate::{Register, StackFrame};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug)]
 pub enum Type {
     None,
 
@@ -28,8 +28,9 @@ pub enum Type {
     // Other
     Boolean(bool),
     Pointer(usize),
-    Address(usize),
+    Label(usize),
     Register(Register),
+    Thread(Box<std::thread::JoinHandle<StackFrame>>),
 }
 impl Type {
     pub fn to_raw(&self) -> RawType {
@@ -53,8 +54,9 @@ impl Type {
             Type::String(_) => RawType::String,
             Type::Boolean(_) => RawType::Boolean,
             Type::Pointer(_) => RawType::Pointer,
-            Type::Address(_) => RawType::Address,
+            Type::Label(_) => RawType::Address,
             Type::Register(_) => RawType::Register,
+            Type::Thread(_) => RawType::Thread,
         }
     }
 }
@@ -89,4 +91,5 @@ pub enum RawType {
     Pointer,
     Address,
     Register,
+    Thread,
 }

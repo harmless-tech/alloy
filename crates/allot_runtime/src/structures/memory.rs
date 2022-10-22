@@ -1,12 +1,22 @@
 use crate::Type;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct StackFrame {
-    pub stack: Vec<Type>,
-    /// Isolated StackFrames do not use variables from StackFrames below it.
-    pub isolated: bool,
+    stack: Vec<Type>,
 }
-impl StackFrame {}
+impl StackFrame {
+    pub fn new() -> Self {
+        Self { stack: Vec::new() }
+    }
+}
 
-#[derive(Debug)]
-pub struct Heap {}
+#[derive(Debug, Default)]
+pub struct Heap {
+    //TODO: Heaps only grow right now, is this fine?
+    heap: Vec<Type>,
+}
+impl Heap {
+    pub fn new() -> Self {
+        Self { heap: Vec::new() }
+    }
+}

@@ -1,45 +1,36 @@
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Operation {
-    Arithmetic(ArithmeticOperation),
-    BitWise(BitWiseOperation),
-    Logic(LogicOperation),
-    Relational(RelationalOperation),
+    Prim1(OpPrim1),
+    Prim2(OpPrim2),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum ArithmeticOperation {
+pub enum OpPrim1 {
+    Increment,  // ++
+    Decrement,  // --
+    Not,        // !
+    BitwiseNot, // ~
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum OpPrim2 {
     Add,            // +
     Subtract,       // -
     Multiplication, // *
     Division,       // /
     Modulus,        // %
-    Increment,      // ++
-    Decrement,      // --
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum BitWiseOperation {
-    And,               // &
-    Or,                // |
-    Xor,               // ^
-    Not,               // ~
-    ShiftLeft(usize),  // << u64
-    ShiftRight(usize), // >> u64
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum LogicOperation {
-    Not, // !
-    And, // &&
-    Or,  // ||
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum RelationalOperation {
-    Equal,        // ==
-    NotEqual,     // !=
-    Greater,      // >
-    Less,         // <
-    GreaterEqual, // >=
-    LessEqual,    // <=
+    And,            // &&
+    Or,             // ||
+    Xor,            // ^^
+    Equal,          // ==
+    NotEqual,       // !=
+    Greater,        // >
+    Less,           // <
+    GreaterEqual,   // >=
+    LessEqual,      // <=
+    BitwiseAnd,     // &
+    BitwiseOr,      // |
+    BitwiseXor,     // ^
+    ShiftLeft,      // <<
+    ShiftRight,     // >>
 }

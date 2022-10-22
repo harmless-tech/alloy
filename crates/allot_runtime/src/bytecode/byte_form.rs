@@ -1,47 +1,123 @@
-use crate::{
-    ArithmeticOperation, BitWiseOperation, LogicOperation, Operation, RawType, Register,
-    RelationalOperation, Type,
-};
+use crate::{OpPrim1, OpPrim2, Operation, RawType, Register};
 
 pub trait ByteForm {
     fn to_byte(&self) -> u8;
     fn from_byte(byte: u8) -> Self; // TODO: Result type instead of panic?
 }
 
-// Types
+// Registers
 
-impl ByteForm for Type {
+impl ByteForm for Register {
     fn to_byte(&self) -> u8 {
-        self.to_raw().to_byte()
+        match self {
+            Register::R0 => 0,
+            Register::R1 => 1,
+            Register::R2 => 2,
+            Register::R3 => 3,
+            Register::R4 => 4,
+            Register::R5 => 5,
+            Register::R6 => 6,
+            Register::R7 => 7,
+            Register::R8 => 8,
+            Register::R9 => 9,
+            Register::R10 => 10,
+            Register::R11 => 11,
+            Register::R12 => 12,
+            Register::R13 => 13,
+            Register::R14 => 14,
+            Register::R15 => 15,
+            Register::R16 => 16,
+            Register::R17 => 17,
+            Register::R18 => 18,
+            Register::R19 => 19,
+            Register::R20 => 20,
+            Register::R21 => 21,
+            Register::R22 => 22,
+            Register::R23 => 23,
+            Register::R24 => 24,
+            Register::R25 => 25,
+            Register::R26 => 26,
+            Register::R27 => 27,
+            Register::R28 => 28,
+            Register::R29 => 29,
+            Register::None => 255,
+        }
     }
 
     fn from_byte(byte: u8) -> Self {
         match byte {
-            0 => Type::None,
-            1 => Type::Int8(0),
-            2 => Type::Int16(0),
-            3 => Type::Int32(0),
-            4 => Type::Int(0),
-            5 => Type::Int64(0),
-            6 => Type::Int128(0),
-            7 => Type::UInt8(0),
-            8 => Type::UInt16(0),
-            9 => Type::UInt32(0),
-            10 => Type::UInt(0),
-            11 => Type::UInt64(0),
-            12 => Type::UInt128(0),
-            13 => Type::Float32(0.0),
-            14 => Type::Float64(0.0),
-            15 => Type::Char(' '),
-            16 => Type::String(String::new()),
-            17 => Type::Boolean(false),
-            18 => Type::Pointer(0),
-            19 => Type::Address(0),
-            20 => Type::Register(Register::R0),
-            _ => panic!("Invalid Type byte: {byte}"),
+            0 => Register::R0,
+            1 => Register::R1,
+            2 => Register::R2,
+            3 => Register::R3,
+            4 => Register::R4,
+            5 => Register::R5,
+            6 => Register::R6,
+            7 => Register::R7,
+            8 => Register::R8,
+            9 => Register::R9,
+            10 => Register::R10,
+            11 => Register::R11,
+            12 => Register::R12,
+            13 => Register::R13,
+            14 => Register::R14,
+            15 => Register::R15,
+            16 => Register::R16,
+            17 => Register::R17,
+            18 => Register::R18,
+            19 => Register::R19,
+            20 => Register::R20,
+            21 => Register::R21,
+            22 => Register::R22,
+            23 => Register::R23,
+            24 => Register::R24,
+            25 => Register::R25,
+            26 => Register::R26,
+            27 => Register::R27,
+            28 => Register::R28,
+            29 => Register::R29,
+            255 => Register::None,
+            _ => panic!("Invalid Register byte: {byte}"),
         }
     }
 }
+
+// Types
+
+// TODO: Is this needed for types?
+// impl ByteForm for Type {
+//     fn to_byte(&self) -> u8 {
+//         self.to_raw().to_byte()
+//     }
+//
+//     fn from_byte(byte: u8) -> Self {
+//         match byte {
+//             0 => Type::None,
+//             1 => Type::Int8(0),
+//             2 => Type::Int16(0),
+//             3 => Type::Int32(0),
+//             4 => Type::Int(0),
+//             5 => Type::Int64(0),
+//             6 => Type::Int128(0),
+//             7 => Type::UInt8(0),
+//             8 => Type::UInt16(0),
+//             9 => Type::UInt32(0),
+//             10 => Type::UInt(0),
+//             11 => Type::UInt64(0),
+//             12 => Type::UInt128(0),
+//             13 => Type::Float32(0.0),
+//             14 => Type::Float64(0.0),
+//             15 => Type::Char(' '),
+//             16 => Type::String(String::new()),
+//             17 => Type::Boolean(false),
+//             18 => Type::Pointer(0),
+//             19 => Type::Label(0),
+//             20 => Type::Register(Register::None),
+//             // 21 => Type::Thread(),
+//             _ => panic!("Invalid Type byte: {byte}"),
+//         }
+//     }
+// }
 
 impl ByteForm for RawType {
     fn to_byte(&self) -> u8 {
@@ -67,6 +143,7 @@ impl ByteForm for RawType {
             RawType::Pointer => 18,
             RawType::Address => 19,
             RawType::Register => 20,
+            RawType::Thread => 21,
         }
     }
 
@@ -93,6 +170,7 @@ impl ByteForm for RawType {
             18 => RawType::Pointer,
             19 => RawType::Address,
             20 => RawType::Register,
+            21 => RawType::Thread,
             _ => panic!("Invalid RawType byte: {byte}"),
         }
     }
@@ -103,119 +181,91 @@ impl ByteForm for RawType {
 impl ByteForm for Operation {
     fn to_byte(&self) -> u8 {
         match self {
-            Operation::Arithmetic(op) => op.to_byte(),
-            Operation::BitWise(op) => (1 << 4) | op.to_byte(),
-            Operation::Logic(op) => (2 << 4) | op.to_byte(),
-            Operation::Relational(op) => (3 << 4) | op.to_byte(),
+            Operation::Prim1(op) => op.to_byte(),
+            Operation::Prim2(op) => (0b10000000) | op.to_byte(),
         }
     }
 
     fn from_byte(byte: u8) -> Self {
-        let op = (byte & 0b11110000) >> 4;
-        let t = byte & 0b00001111;
+        let op = (byte & 0b10000000) >> 7;
+        let t = byte & 0b01111111;
 
         match op {
-            0 => Operation::Arithmetic(ArithmeticOperation::from_byte(t)),
-            1 => Operation::BitWise(BitWiseOperation::from_byte(t)),
-            2 => Operation::Logic(LogicOperation::from_byte(t)),
-            3 => Operation::Relational(RelationalOperation::from_byte(t)),
+            0 => Operation::Prim1(OpPrim1::from_byte(t)),
+            1 => Operation::Prim2(OpPrim2::from_byte(t)),
             _ => panic!("Invalid Operation byte: {byte}"),
         }
     }
 }
 
-impl ByteForm for ArithmeticOperation {
+impl ByteForm for OpPrim1 {
     fn to_byte(&self) -> u8 {
         match self {
-            ArithmeticOperation::Add => 0,
-            ArithmeticOperation::Subtract => 1,
-            ArithmeticOperation::Multiplication => 2,
-            ArithmeticOperation::Division => 3,
-            ArithmeticOperation::Modulus => 4,
-            ArithmeticOperation::Increment => 5,
-            ArithmeticOperation::Decrement => 6,
+            OpPrim1::Increment => 0,
+            OpPrim1::Decrement => 1,
+            OpPrim1::Not => 2,
+            OpPrim1::BitwiseNot => 3,
         }
     }
 
     fn from_byte(byte: u8) -> Self {
         match byte {
-            0 => ArithmeticOperation::Add,
-            1 => ArithmeticOperation::Subtract,
-            2 => ArithmeticOperation::Multiplication,
-            3 => ArithmeticOperation::Division,
-            4 => ArithmeticOperation::Modulus,
-            5 => ArithmeticOperation::Increment,
-            6 => ArithmeticOperation::Decrement,
-            _ => panic!("Invalid ArithmeticOperation byte: {byte}"),
+            0 => OpPrim1::Increment,
+            1 => OpPrim1::Decrement,
+            2 => OpPrim1::Not,
+            3 => OpPrim1::BitwiseNot,
+            _ => panic!("Invalid OpPrim1 byte: {byte}"),
         }
     }
 }
 
-impl ByteForm for BitWiseOperation {
+impl ByteForm for OpPrim2 {
     fn to_byte(&self) -> u8 {
         match self {
-            BitWiseOperation::And => 0,
-            BitWiseOperation::Or => 1,
-            BitWiseOperation::Xor => 2,
-            BitWiseOperation::Not => 3,
-            BitWiseOperation::ShiftLeft(_) => 4,
-            BitWiseOperation::ShiftRight(_) => 5,
+            OpPrim2::Add => 0,
+            OpPrim2::Subtract => 1,
+            OpPrim2::Multiplication => 2,
+            OpPrim2::Division => 3,
+            OpPrim2::Modulus => 4,
+            OpPrim2::And => 5,
+            OpPrim2::Or => 6,
+            OpPrim2::Xor => 7,
+            OpPrim2::Equal => 8,
+            OpPrim2::NotEqual => 9,
+            OpPrim2::Greater => 10,
+            OpPrim2::Less => 11,
+            OpPrim2::GreaterEqual => 12,
+            OpPrim2::LessEqual => 13,
+            OpPrim2::BitwiseAnd => 14,
+            OpPrim2::BitwiseOr => 15,
+            OpPrim2::BitwiseXor => 16,
+            OpPrim2::ShiftLeft => 17,
+            OpPrim2::ShiftRight => 18,
         }
     }
 
     fn from_byte(byte: u8) -> Self {
         match byte {
-            0 => BitWiseOperation::And,
-            1 => BitWiseOperation::Or,
-            2 => BitWiseOperation::Xor,
-            3 => BitWiseOperation::Not,
-            4 => BitWiseOperation::ShiftLeft(0),
-            5 => BitWiseOperation::ShiftRight(0),
-            _ => panic!("Invalid BitWiseOperation byte: {byte}"),
-        }
-    }
-}
-
-impl ByteForm for LogicOperation {
-    fn to_byte(&self) -> u8 {
-        match self {
-            LogicOperation::Not => 0,
-            LogicOperation::And => 1,
-            LogicOperation::Or => 2,
-        }
-    }
-
-    fn from_byte(byte: u8) -> Self {
-        match byte {
-            0 => LogicOperation::Not,
-            1 => LogicOperation::And,
-            2 => LogicOperation::Or,
-            _ => panic!("Invalid LogicOperation byte: {byte}"),
-        }
-    }
-}
-
-impl ByteForm for RelationalOperation {
-    fn to_byte(&self) -> u8 {
-        match self {
-            RelationalOperation::Equal => 0,
-            RelationalOperation::NotEqual => 1,
-            RelationalOperation::Greater => 2,
-            RelationalOperation::Less => 3,
-            RelationalOperation::GreaterEqual => 4,
-            RelationalOperation::LessEqual => 5,
-        }
-    }
-
-    fn from_byte(byte: u8) -> Self {
-        match byte {
-            0 => RelationalOperation::Equal,
-            1 => RelationalOperation::NotEqual,
-            2 => RelationalOperation::Greater,
-            3 => RelationalOperation::Less,
-            4 => RelationalOperation::GreaterEqual,
-            5 => RelationalOperation::LessEqual,
-            _ => panic!("Invalid RelationalOperation byte: {byte}"),
+            0 => OpPrim2::Add,
+            1 => OpPrim2::Subtract,
+            2 => OpPrim2::Multiplication,
+            3 => OpPrim2::Division,
+            4 => OpPrim2::Modulus,
+            5 => OpPrim2::And,
+            6 => OpPrim2::Or,
+            7 => OpPrim2::Xor,
+            8 => OpPrim2::Equal,
+            9 => OpPrim2::NotEqual,
+            10 => OpPrim2::Greater,
+            11 => OpPrim2::Less,
+            12 => OpPrim2::GreaterEqual,
+            13 => OpPrim2::LessEqual,
+            14 => OpPrim2::BitwiseAnd,
+            15 => OpPrim2::BitwiseOr,
+            16 => OpPrim2::BitwiseXor,
+            17 => OpPrim2::ShiftLeft,
+            18 => OpPrim2::ShiftRight,
+            _ => panic!("Invalid OpPrim2 byte: {byte}"),
         }
     }
 }

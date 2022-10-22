@@ -10,19 +10,19 @@ mod traits;
 #[cfg(feature = "bytecode")]
 pub use bytecode::bytecode_convert;
 
-use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 use structures::*;
 
 pub struct AllotRuntime {
+    current: usize,
     instructions: Vec<Instruction>,
-    address_map: Vec<usize>,
+    labels: Vec<usize>,
     registers: [Type; 30],
     stack_frames: Vec<StackFrame>,
-    heap: HashMap<usize, Type>,
-    current: usize,
+    heap: Arc<RwLock<Heap>>,
 }
 impl AllotRuntime {
-    pub fn new(instructions: Vec<Instruction>) -> Self {
+    pub fn new(instructions: Vec<Instruction>, labels: Vec<usize>) -> Self {
         let registers: [Type; 30] = (0..30)
             .map(|_i| Type::None)
             .collect::<Vec<_>>()
@@ -31,10 +31,10 @@ impl AllotRuntime {
 
         Self {
             instructions,
-            address_map: Vec::new(),
+            labels,
             registers,
-            stack_frames: Vec::new(),
-            heap: HashMap::new(),
+            stack_frames: vec![StackFrame::new()],
+            heap: Arc::new(RwLock::new(Heap::new())),
             current: 0,
         }
     }
