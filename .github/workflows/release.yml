@@ -205,6 +205,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [release]
     steps:
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@v1.0
+        with:
+          swap-size-gb: 10
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:

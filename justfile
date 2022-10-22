@@ -26,5 +26,3 @@ build:
 
 build-release: check test
     cargo build --release --workspace
-
-
