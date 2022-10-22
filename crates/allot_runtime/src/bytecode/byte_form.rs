@@ -144,9 +144,10 @@ impl ByteForm for RawType {
             RawType::String => 16,
             RawType::Boolean => 17,
             RawType::Pointer => 18,
-            RawType::Address => 19,
-            RawType::Register => 20,
-            RawType::Thread => 21,
+            RawType::Label => 19,
+            RawType::Address => 20,
+            RawType::Register => 21,
+            RawType::Thread => 22,
         }
     }
 
@@ -171,9 +172,10 @@ impl ByteForm for RawType {
             16 => RawType::String,
             17 => RawType::Boolean,
             18 => RawType::Pointer,
-            19 => RawType::Address,
-            20 => RawType::Register,
-            21 => RawType::Thread,
+            19 => RawType::Label,
+            20 => RawType::Address,
+            21 => RawType::Register,
+            22 => RawType::Thread,
             _ => panic!("Invalid RawType byte: {byte}"),
         }
     }

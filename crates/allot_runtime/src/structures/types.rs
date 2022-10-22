@@ -29,8 +29,9 @@ pub enum Type {
     Boolean(bool),
     Pointer(usize),
     Label(usize),
+    Address(usize),
     Register(Register),
-    Thread(Box<std::thread::JoinHandle<(bool, StackFrame)>>), // Exit, StackFrame
+    Thread(Box<std::thread::JoinHandle<(Option<i32>, StackFrame)>>), // Exit, StackFrame
 }
 impl Type {
     pub fn to_raw(&self) -> RawType {
@@ -54,9 +55,38 @@ impl Type {
             Type::String(_) => RawType::String,
             Type::Boolean(_) => RawType::Boolean,
             Type::Pointer(_) => RawType::Pointer,
-            Type::Label(_) => RawType::Address,
+            Type::Label(_) => RawType::Label,
+            Type::Address(_) => RawType::Address,
             Type::Register(_) => RawType::Register,
             Type::Thread(_) => RawType::Thread,
+        }
+    }
+
+    pub fn copy(&self) -> Self {
+        match self {
+            Type::None => Type::None,
+            Type::Int8(v) => Type::Int8(*v),
+            Type::Int16(v) => Type::Int16(*v),
+            Type::Int32(v) => Type::Int32(*v),
+            Type::Int(v) => Type::Int(*v),
+            Type::Int64(v) => Type::Int64(*v),
+            Type::Int128(v) => Type::Int128(*v),
+            Type::UInt8(v) => Type::UInt8(*v),
+            Type::UInt16(v) => Type::UInt16(*v),
+            Type::UInt32(v) => Type::UInt32(*v),
+            Type::UInt(v) => Type::UInt(*v),
+            Type::UInt64(v) => Type::UInt64(*v),
+            Type::UInt128(v) => Type::UInt128(*v),
+            Type::Float32(v) => Type::Float32(*v),
+            Type::Float64(v) => Type::Float64(*v),
+            Type::Char(v) => Type::Char(*v),
+            Type::String(v) => Type::String(v.clone()),
+            Type::Boolean(v) => Type::Boolean(*v),
+            Type::Pointer(v) => Type::Pointer(*v),
+            Type::Label(v) => Type::Label(*v),
+            Type::Address(v) => Type::Address(*v),
+            Type::Register(v) => Type::Register(*v),
+            Type::Thread(_) => panic!("Copy does not work on thread type."),
         }
     }
 }
@@ -89,7 +119,19 @@ pub enum RawType {
     // Other
     Boolean,
     Pointer,
+    Label,
     Address,
     Register,
     Thread,
+}
+
+#[derive(Debug)]
+pub enum HeapType {
+    None,
+    Type(Type),
+    // File
+    // Vec
+    // Tuple?
+    // HashSet
+    // HashMap
 }

@@ -6,7 +6,7 @@ pub use memory::*;
 pub use operations::*;
 pub use types::*;
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 #[repr(u8)]
 pub enum Register {
     R0 = 0,
@@ -52,7 +52,7 @@ pub enum Instruction {
     Op(Operation, [Register; 2]),
 
     /// Moves the value in the second register to the first register.
-    Mov(Register, Register),
+    Mov(Register, Type),
     /// Copies the value in the second register and puts it in the first register.
     /// May fail if the type cannot be copied.
     Cpy(Register, Register),
@@ -71,7 +71,7 @@ pub enum Instruction {
     Call(usize),
 
     /// Exits the program with the int.
-    Exit(Type),
+    Exit(Type), // Type = Int32 | Register
 
     /// Pushes the value in the register onto the stack in the current stack frame.
     Push(Register),
