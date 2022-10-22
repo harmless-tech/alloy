@@ -32,3 +32,9 @@ build:
 
 build-release: check test
     cargo build --release --workspace
+
+publish-dry:
+    cargo publish --dry-run --allow-dirty -p allot_runtime
+    cargo package --list --allow-dirty -p allot_runtime
+    cargo publish --dry-run --allow-dirty -p allot
+    cargo package --list --allow-dirty -p allot

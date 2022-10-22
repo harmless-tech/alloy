@@ -16,7 +16,7 @@ name = "allot"
 path = "src/main.rs"
 
 [dependencies]
-allot_runtime = { path = "crates/allot_runtime", features = ["bytecode"] }
+allot_runtime = { version = "0.0.1", path = "crates/allot_runtime", features = ["bytecode"] }
 clap = { version = "4.0.18", features = ["derive"] }
 
 [workspace]
@@ -27,3 +27,6 @@ opt-level = 3
 lto = true
 codegen-units = 1
 strip = true
+
+[package.metadata.docs.rs]
+all-features = true

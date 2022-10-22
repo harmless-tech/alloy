@@ -1,22 +1,18 @@
 #![allow(dead_code)] // TODO: Remove?
 
-extern crate core;
-
-#[cfg(feature = "bytecode")]
-mod bytecode;
-mod library;
-pub mod structures;
-#[cfg(test)]
-mod tests;
-mod traits;
+use std::sync::{Arc, RwLock};
 
 #[cfg(feature = "bytecode")]
 pub use bytecode::from_bytecode;
 #[cfg(feature = "bytecode_gen")]
 pub use bytecode::to_bytecode;
-
-use std::sync::{Arc, RwLock};
 use structures::*;
+
+#[cfg(feature = "bytecode")]
+mod bytecode;
+mod library;
+pub mod structures;
+mod traits;
 
 pub struct AllotRuntime {
     current: usize,
@@ -210,31 +206,4 @@ impl AllotRuntime {
         }
         code.unwrap()
     }
-
-    // #[inline]
-    // fn get_register(&mut self, register: Register) -> &mut Type {
-    //     match self.registers.get_mut(register as usize) {
-    //         None => panic!("{:?} is not a valid register.", register),
-    //         Some(i) => i,
-    //     }
-    // }
-}
-/// Instructions Impl.
-impl AllotRuntime {
-    // #[inline]
-    // fn i_exit(&mut self, t: &Type) -> i32 {
-    //     match t {
-    //         Type::Int32(i) => *i,
-    //         Type::Register(reg) => {
-    //             let val = self.registers.get_mut(reg.clone());
-    //             if let Type::Int32(i) = val {
-    //                 i.clone()
-    //             }
-    //             else {
-    //                 panic!("Exit requires a Int32 Type.");
-    //             }
-    //         }
-    //         _ => panic!("Exit requires a Int32 Type.")
-    //     }
-    // }
 }

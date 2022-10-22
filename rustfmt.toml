@@ -3,5 +3,6 @@ newline_style = "Native"
 reorder_imports = true
 control_brace_style = "ClosingNextLine"
 imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
 edition = "2021"
 format_code_in_doc_comments = true

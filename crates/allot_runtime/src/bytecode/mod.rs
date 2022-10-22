@@ -1,7 +1,8 @@
-mod byte_form;
+pub use byte_form::*;
 
 use crate::Instruction;
-pub use byte_form::*;
+
+mod byte_form;
 
 const BYTECODE_VERSION: usize = 0;
 

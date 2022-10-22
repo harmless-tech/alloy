@@ -1,24 +1,18 @@
-use crate::{
+use allot_runtime::{
+    structures::{
+        Instruction::{Assert, Exit, Mov, Op},
+        OpPrim2::Add,
+        Operation::Prim2,
+        Register::{R1, R2},
+        Type,
+    },
     AllotRuntime,
-    Instruction::{Assert, Exit, Mov, Op},
-    OpPrim2::Add,
-    Operation::Prim2,
-    Register::{R1, R2},
-    Type,
 };
 
 #[test]
-fn operations() {
-    use crate::{bytecode::ByteForm, OpPrim1, Operation};
-
-    assert_eq!(
-        Operation::from_byte(0),
-        Operation::Prim1(OpPrim1::Increment)
-    );
-}
+fn operations() {}
 
 #[test]
-#[cfg(debug_assertions)]
 fn mov() {
     let mut runtime = AllotRuntime::new(
         vec![

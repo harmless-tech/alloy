@@ -7,4 +7,3 @@ Currently, a heavy work in-progress. Check back later for documentation and a be
 - Split bytecode into its own crate.
 - Use fixed-map or phf for binding runtime functions. (Call Instruction)
 - Use Rc for ThreadHandle to allow Type to be Cloneable and Copiable.
-- Setup bench.

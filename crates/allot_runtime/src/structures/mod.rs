@@ -1,10 +1,10 @@
-mod memory;
-mod operations;
-mod types;
-
 pub use memory::*;
 pub use operations::*;
 pub use types::*;
+
+mod memory;
+mod operations;
+mod types;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 #[repr(u8)]
