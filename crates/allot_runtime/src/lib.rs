@@ -172,9 +172,6 @@ impl AllotRuntime {
             Instruction::PopInto => {}
             Instruction::ThreadStart(_) => {}
             Instruction::ThreadJoin(_) => {}
-
-            // Only available in debug builds.
-            #[cfg(debug_assertions)]
             Instruction::Assert(reg, t) => {
                 // TODO: This is a kinda icky way to do this.
                 let val = self.registers.own(*reg);
@@ -188,6 +185,8 @@ impl AllotRuntime {
                     return Some(-1);
                 }
             }
+
+            // Only available in debug builds.
             #[cfg(debug_assertions)]
             Instruction::Dbg(reg) => {
                 println!("Register {:?}", &reg);

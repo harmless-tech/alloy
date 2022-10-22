@@ -21,6 +21,12 @@ test:
 test-out:
     cargo test --workspace --all-features -- --nocapture
 
+bench:
+    cargo +nightly bench --workspace --all-features
+
+benchr:
+    cargo bench --workspace --all-features --release
+
 build:
     cargo build --workspace
 

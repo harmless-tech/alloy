@@ -97,8 +97,7 @@ pub enum Instruction {
     /// Joins a thread and pushes its stack frame.
     ThreadJoin(Register),
 
-    #[cfg(debug_assertions)]
-    /// Assert that a register is equal to a type. (Debug builds only)
+    /// Asserts that a register is equal to a type. Should only be used in debug builds of your allot program.
     Assert(Register, Type),
 
     #[cfg(debug_assertions)]
