@@ -5,6 +5,9 @@ pub trait ByteForm {
     fn from_byte(byte: u8) -> Self; // TODO: Result type instead of panic?
 }
 
+// Instructions
+// TODO: Instructions.
+
 // Registers
 
 impl ByteForm for Register {

@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "allot"
-version = "0.0.1"
+version = "0.0.1-alpha"
 dependencies = [
  "allot_runtime",
  "clap",

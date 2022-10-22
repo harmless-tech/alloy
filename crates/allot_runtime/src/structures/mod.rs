@@ -51,13 +51,19 @@ pub enum Instruction {
     /// Does an operation on register(s).
     Op(Operation, [Register; 2]),
 
+    /// Moves the value in the second register to the first register.
+    Mov(Register, Register),
+    /// Copies the value in the second register and puts it in the first register.
+    /// May fail if the type cannot be copied.
+    Cpy(Register, Register),
+
     /// Attempts the cast the value in the register to another type.
     Cast(RawType, Register),
 
     /// Loads a label value into the register.
     Lea(Register),
     /// Jumps to a label, depending on the operation.
-    Jmp(Operation, Type), // Type = Label || Register
+    Jmp(Option<Operation>, Type), // Type = Label || Register
     /// Pops the stack and jumps to that label.
     Ret,
 
@@ -72,13 +78,15 @@ pub enum Instruction {
     /// Pops the value on top of the stack into register or gets rid of it.
     Pop(Option<Register>),
     /// Pushes a new stack frame.
-    PushFrame,
+    PushFrame(bool),
     /// Pops the top stack frame. Errors if it is the root stack frame.
     PopFrame,
-    /// Pushes onto the last stack frame.
+    /// Pushes onto the last stack frame. If no register is listed, then it pops from the current stack frame.
+    /// May fail if the current stack frame is isolated.
     PushOnto(Option<Register>),
     /// Pops from the last stack frame and pushes it to the current one.
-    PopInto(Option<Register>),
+    /// May fail if the last stack frame is isolated.
+    PopInto,
 
     /// Takes the current stack frame (Errors if it is the root stack frame) and runs it on a new thread starting at the label.
     /// Threads have their own registers and stack frames, the heap is shared between all threads.
@@ -90,4 +98,14 @@ pub enum Instruction {
     #[cfg(debug_assertions)]
     /// Assert that a register is equal to a type. (Debug builds only)
     Assert(Register, Type),
+
+    #[cfg(debug_assertions)]
+    /// Prints a register. (Debug builds only)
+    Dbg(Register),
+
+    #[cfg(debug_assertions)]
+    /// Prints all registers, stack frames, and the heap. (Debug builds only)
+    Dump,
 }
+
+// TODO: RawInstruction enum like RawType?

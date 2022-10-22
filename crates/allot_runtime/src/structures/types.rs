@@ -30,7 +30,7 @@ pub enum Type {
     Pointer(usize),
     Label(usize),
     Register(Register),
-    Thread(Box<std::thread::JoinHandle<StackFrame>>),
+    Thread(Box<std::thread::JoinHandle<(bool, StackFrame)>>), // Exit, StackFrame
 }
 impl Type {
     pub fn to_raw(&self) -> RawType {

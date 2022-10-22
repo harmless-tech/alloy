@@ -16,3 +16,4 @@ license = "MIT"
 [features]
 default = []
 bytecode = []
+bytecode_gen = ["bytecode"]
