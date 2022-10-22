@@ -27,7 +27,7 @@ name = "tests"
 path = "tests/tests.rs"
 
 [[bench]]
-name = "instructions"
+name = "benchmarks"
 harness = false
 
 [package.metadata.docs.rs]

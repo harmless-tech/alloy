@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use crate::{HeapType, Register, Type};
 
 pub struct Registers(Vec<Type>);
@@ -21,7 +23,7 @@ impl Registers {
         }
     }
 
-    pub fn load(&mut self, register: Register, t: Type) {
+    pub fn insert(&mut self, register: Register, t: Type) {
         let i = register as usize;
         if i >= 30 {
             panic!("{:?} is not a valid register.", register)
@@ -31,7 +33,7 @@ impl Registers {
         self.0.insert(i, t);
     }
 
-    pub fn own(&mut self, register: Register) -> Type {
+    pub fn take(&mut self, register: Register) -> Type {
         let i = register as usize;
         if i >= 30 {
             panic!("{:?} is not a valid register.", register)
@@ -43,9 +45,9 @@ impl Registers {
         element
     }
 
-    pub fn copy(&mut self, register: Register) -> Type {
+    pub fn clone(&mut self, register: Register) -> Type {
         let r = self.get(register);
-        r.copy()
+        r.clone()
     }
 }
 impl Default for Registers {
@@ -78,15 +80,54 @@ impl StackFrame {
             Some(v) => v,
         }
     }
+
+    pub fn clone_offset(&self, offset: usize) -> Type {
+        let offset = self.stack.len() - offset - 1;
+        match self.stack.get(offset) {
+            None => panic!("There is no item on the stack at {offset}."),
+            Some(item) => item.clone(),
+        }
+    }
 }
 
 #[derive(Debug, Default)]
 pub struct Heap {
-    //TODO: Heaps only grow right now, is this fine?
-    heap: Vec<HeapType>,
+    heap: BTreeMap<usize, HeapType>, // BTreeMap or HashMap?
+    heap_pointer: usize,
 }
 impl Heap {
     pub fn new() -> Self {
-        Self { heap: Vec::new() }
+        Self {
+            heap: BTreeMap::new(),
+            heap_pointer: 0,
+        }
+    }
+
+    pub fn push(&mut self, t: HeapType) {
+        self.heap.insert(self.heap_pointer, t);
+        self.heap_pointer += 1;
+    }
+
+    pub fn get(&mut self, pointer: usize) -> &HeapType {
+        match self.heap.get(&pointer) {
+            None => panic!(
+                "Tried to get an item on the heap at {pointer}, but there was nothing there."
+            ),
+            Some(item) => item,
+        }
+    }
+
+    pub fn get_mut(&mut self, pointer: usize) -> &mut HeapType {
+        match self.heap.get_mut(&pointer) {
+            None => panic!(
+                "Tried to get_mut an item on the heap at {pointer}, but there was nothing there."
+            ),
+            Some(item) => item,
+        }
+    }
+
+    /// Frees the memory at the current pointer. Does nothing if the pointer points to nothing.
+    pub fn free(&mut self, pointer: usize) {
+        self.heap.remove(&pointer);
     }
 }

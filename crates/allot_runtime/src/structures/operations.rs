@@ -6,18 +6,18 @@ pub enum Operation {
     Prim2(OpPrim2),
 }
 impl Operation {
-    pub fn resolve(&self, registers: &mut Registers, regs: &[Register; 2]) {
+    pub fn solve(&self, registers: &mut Registers, regs: &[Register; 2]) {
         match self {
             Operation::Prim1(op) => {
-                let v = registers.own(regs[0]);
-                let t = op.resolve(v);
-                registers.load(regs[0], t);
+                let v = registers.take(regs[0]);
+                let t = op.solve(v);
+                registers.insert(regs[0], t);
             }
             Operation::Prim2(op) => {
-                let v1 = registers.copy(regs[0]);
-                let v2 = registers.copy(regs[1]);
-                let t = op.resolve(v1, v2);
-                registers.load(regs[0], t);
+                let v1 = registers.clone(regs[0]);
+                let v2 = registers.clone(regs[1]);
+                let t = op.solve(v1, v2);
+                registers.insert(regs[0], t);
             }
         }
     }
@@ -31,7 +31,7 @@ pub enum OpPrim1 {
     BitwiseNot, // ~
 }
 impl OpPrim1 {
-    pub fn resolve(&self, t: Type) -> Type {
+    pub fn solve(&self, t: Type) -> Type {
         match self {
             OpPrim1::Increment => match t {
                 Type::Int8(v) => Type::Int8(v + 1),
@@ -115,7 +115,7 @@ pub enum OpPrim2 {
     ShiftRight,     // >>
 }
 impl OpPrim2 {
-    pub fn resolve(&self, t1: Type, t2: Type) -> Type {
+    pub fn solve(&self, t1: Type, t2: Type) -> Type {
         match self {
             OpPrim2::Add => match (t1, t2) {
                 (Type::Int8(v1), Type::Int8(v2)) => Type::Int8(v1 + v2),

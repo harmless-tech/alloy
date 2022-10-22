@@ -24,9 +24,6 @@ test-out:
 bench:
     cargo +nightly bench --workspace --all-features
 
-benchr:
-    cargo bench --workspace --all-features --release
-
 build:
     cargo build --workspace
 

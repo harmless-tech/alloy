@@ -67,8 +67,8 @@ pub enum Instruction {
     /// Pops the stack and jumps to that label.
     Ret,
 
-    /// Calls a function, functions get the current stack frame, the number of args in register 9, and access to the heap.
-    Call(usize),
+    /// Calls a function, functions get the current stack frame, read-only access to the number of args in register 9, write-only access to register 0, and access to the heap.
+    Call(String),
 
     /// Exits the program with the int.
     Exit(Type), // Type = Int32 | Register
@@ -79,6 +79,10 @@ pub enum Instruction {
     PushCpy(Register),
     /// Pops the value on top of the stack into register or gets rid of it.
     Pop(Option<Register>),
+    /// Pops many values off of the stack, cannot store any of them.
+    PopMany(Type), // Type = None | UInt | Register
+    /// Copies an item at the stack offset into a register.
+    StackCpy(Register, Type), // Type = None | UInt | Register
     /// Pushes a new stack frame.
     PushFrame(bool),
     /// Pops the top stack frame. Errors if it is the root stack frame.

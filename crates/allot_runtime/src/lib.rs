@@ -53,22 +53,22 @@ impl AllotRuntime {
         match instruction {
             Instruction::Nop => {}
             Instruction::Op(op, regs) => {
-                op.resolve(&mut self.registers, regs);
+                op.solve(&mut self.registers, regs);
             }
             Instruction::Mov(reg, t) => {
                 let val = match t {
                     Type::Pointer(_) | Type::Label(_) | Type::Address(_) | Type::Thread(_) => {
                         panic!("Attempted to move impossible type into a register.")
                     }
-                    Type::Register(reg) => self.registers.own(*reg),
-                    _ => t.copy(),
+                    Type::Register(reg) => self.registers.take(*reg),
+                    _ => t.clone(),
                 };
 
-                self.registers.load(*reg, val);
+                self.registers.insert(*reg, val);
             }
             Instruction::Cpy(reg1, reg2) => {
                 let val = self.registers.get(*reg2);
-                self.registers.load(*reg1, val.copy())
+                self.registers.insert(*reg1, val.clone())
             }
             Instruction::Cast(_, _) => {}
             Instruction::Lea(reg, label) => {
@@ -76,7 +76,7 @@ impl AllotRuntime {
                     None => panic!("Label {label} was not found."),
                     Some(l) => *l,
                 };
-                self.registers.load(*reg, Type::Label(val));
+                self.registers.insert(*reg, Type::Label(val));
             }
             Instruction::Jmp(opt_reg, label) => {
                 let label = match label {
@@ -129,7 +129,7 @@ impl AllotRuntime {
                 return Some(i);
             }
             Instruction::Push(reg) => {
-                let val = self.registers.own(*reg);
+                let val = self.registers.take(*reg);
                 match self.stack_frames.last_mut() {
                     None => panic!("No stack frames."),
                     Some(frame) => {
@@ -142,7 +142,7 @@ impl AllotRuntime {
                 match self.stack_frames.last_mut() {
                     None => panic!("No stack frames."),
                     Some(frame) => {
-                        frame.push(val.copy());
+                        frame.push(val.clone());
                     }
                 }
             }
@@ -154,9 +154,11 @@ impl AllotRuntime {
 
                 match opt_reg {
                     None => {}
-                    Some(reg) => self.registers.load(*reg, val),
+                    Some(reg) => self.registers.insert(*reg, val),
                 }
             }
+            Instruction::PopMany(_) => {}
+            Instruction::StackCpy(_, _) => {}
             Instruction::PushFrame(b) => self.stack_frames.push(StackFrame::new(*b)),
             Instruction::PopFrame => {
                 let val = self.stack_frames.pop();
@@ -170,9 +172,10 @@ impl AllotRuntime {
             Instruction::ThreadJoin(_) => {}
             Instruction::Assert(reg, t) => {
                 // TODO: This is a kinda icky way to do this.
-                let val = self.registers.own(*reg);
-                let result = OpPrim2::Equal.resolve(val, t.copy());
+                let val = self.registers.clone(*reg);
+                let result = OpPrim2::Equal.solve(val, t.clone());
                 if let Type::Boolean(b) = result {
+                    // println!("Assert: {:?} is {:?}: {}", reg, t, &b); TODO: Should assert have an output?
                     if !b {
                         return Some(-1);
                     }
