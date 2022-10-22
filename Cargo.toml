@@ -16,7 +16,8 @@ name = "allot"
 path = "src/main.rs"
 
 [dependencies]
-allot_runtime = { path = "crates/allot_runtime" }
+allot_runtime = { path = "crates/allot_runtime", features = ["bytecode"] }
+clap = { version = "4.0.18", features = ["derive"] }
 
 [workspace]
 members = ["crates/*"]
