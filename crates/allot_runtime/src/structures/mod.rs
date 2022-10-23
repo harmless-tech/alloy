@@ -67,7 +67,7 @@ pub enum Instruction {
     /// Pops the stack and jumps to that label.
     Ret,
 
-    /// Calls a function, functions get the current stack frame, read-only access to the number of args in register 9, write-only access to register 0, and access to the heap.
+    /// Calls a function, functions get access to the current stack frame, read-only access to register 9, write-only access to register 10, and access to the heap.
     Call(String),
 
     /// Exits the program with the int.
@@ -110,7 +110,7 @@ pub enum Instruction {
 
     #[cfg(debug_assertions)]
     /// Prints all registers, stack frames, and the heap. (Debug builds only)
-    Dump,
+    Dump(u8),
 }
 
 // TODO: RawInstruction enum like RawType?

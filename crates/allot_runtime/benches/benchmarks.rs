@@ -14,7 +14,7 @@ use mimalloc::MiMalloc;
 static GLOBAL: MiMalloc = MiMalloc;
 
 fn copy_speed(c: &mut Criterion) {
-    // mimalloc no guard: [398.99 ns 399.81 ns 400.66 ns]
+    // mimalloc no guard: [390.62 ns 391.54 ns 392.42 ns]
 
     c.bench_function("copy", |b| {
         b.iter(|| {
@@ -43,15 +43,19 @@ fn copy_speed(c: &mut Criterion) {
 
 #[allow(clippy::all)]
 fn heap_perf(c: &mut Criterion) {
-    // Default alloc: [523.48 µs 524.38 µs 525.26 µs]
-    // mimalloc: [466.03 µs 466.63 µs 467.29 µs]
-    // mimalloc no guard: [446.25 µs 446.94 µs 447.72 µs]
+    // mimalloc no guard, btreemap: [78.382 µs 78.488 µs 78.597 µs]
 
     c.bench_function("heap", |b| {
         b.iter(|| {
             let mut heap = Heap::default();
             black_box(for _ in 0..10000 {
-                let _ = heap.push(HeapType::None);
+                let pointer = heap.push(HeapType::None);
+                if let Type::Pointer(pointer) = pointer {
+                    heap.free(pointer);
+                }
+                else {
+                    panic!("BENCH - heap_perf - Heap did not return a pointer.");
+                }
             });
         })
     });

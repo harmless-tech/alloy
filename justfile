@@ -22,7 +22,10 @@ test-out:
     cargo test --workspace --all-features -- --nocapture
 
 bench:
-    cargo +nightly bench --workspace --all-features
+    cargo bench --workspace --all-features
+
+bench-native:
+    RUSTFLAGS="-C target-cpu=native" cargo bench --workspace --all-features
 
 build:
     cargo build --workspace

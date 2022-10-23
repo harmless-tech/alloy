@@ -1,7 +1,11 @@
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, RwLock},
+};
 
 use crate::{HeapType, Register, Type};
 
+#[derive(Debug)]
 pub struct Registers(Vec<Type>);
 impl Registers {
     pub fn new() -> Self {
@@ -90,9 +94,11 @@ impl StackFrame {
     }
 }
 
+pub type CrossHeap = Arc<RwLock<Heap>>;
+
 #[derive(Debug, Default)]
 pub struct Heap {
-    heap: BTreeMap<usize, HeapType>, // BTreeMap or HashMap?
+    heap: BTreeMap<usize, HeapType>,
     heap_pointer: usize,
 }
 impl Heap {
@@ -103,9 +109,11 @@ impl Heap {
         }
     }
 
-    pub fn push(&mut self, t: HeapType) {
+    pub fn push(&mut self, t: HeapType) -> Type {
         self.heap.insert(self.heap_pointer, t);
         self.heap_pointer += 1;
+
+        Type::Pointer(self.heap_pointer - 1)
     }
 
     pub fn get(&mut self, pointer: usize) -> &HeapType {

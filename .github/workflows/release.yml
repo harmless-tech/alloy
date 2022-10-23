@@ -301,6 +301,8 @@ jobs:
       - name: Rust Version
         run: rustc --version
       - name: Publish
-        run: cargo publish --token ${CRATES_TOKEN}
+        run: |
+          cargo publish --token ${CRATES_TOKEN} -p allot_runtime
+          cargo publish --token ${CRATES_TOKEN} -p allot
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}

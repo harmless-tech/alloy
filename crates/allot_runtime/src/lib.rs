@@ -20,7 +20,7 @@ pub struct AllotRuntime {
     labels: Vec<usize>,
     registers: Registers,
     stack_frames: Vec<StackFrame>,
-    heap: Arc<RwLock<Heap>>,
+    heap: CrossHeap,
     is_thread: bool,
 }
 impl AllotRuntime {
@@ -70,7 +70,7 @@ impl AllotRuntime {
                 let val = self.registers.get(*reg2);
                 self.registers.insert(*reg1, val.clone())
             }
-            Instruction::Cast(_, _) => {}
+            Instruction::Cast(_, _) => {} // TODO: MVP
             Instruction::Lea(reg, label) => {
                 let val = match self.labels.get(*label) {
                     None => panic!("Label {label} was not found."),
@@ -78,20 +78,8 @@ impl AllotRuntime {
                 };
                 self.registers.insert(*reg, Type::Label(val));
             }
-            Instruction::Jmp(opt_reg, label) => {
-                let label = match label {
-                    Type::Label(l) => *l,
-                    Type::Register(reg) => {
-                        let val = self.registers.get_mut(*reg);
-                        if let Type::Label(i) = val {
-                            *i
-                        }
-                        else {
-                            panic!("Jmp requires a Label Type.");
-                        }
-                    }
-                    _ => panic!("Jmp requires a Label Type."),
-                };
+            Instruction::Jmp(opt_reg, t) => {
+                let label = AllotRuntime::get_label(t, &mut self.registers);
 
                 let jmp = match opt_reg {
                     None => true,
@@ -110,23 +98,31 @@ impl AllotRuntime {
                     next = label;
                 }
             }
-            Instruction::Ret => {}
-            Instruction::Call(_) => {}
-            Instruction::Exit(t) => {
-                let i = match t {
-                    Type::Int32(i) => *i,
-                    Type::Register(reg) => {
-                        let val = self.registers.get_mut(*reg);
-                        if let Type::Int32(i) = val {
-                            *i
-                        }
-                        else {
-                            panic!("Exit requires a Int32 Type.");
-                        }
-                    }
-                    _ => panic!("Exit requires a Int32 Type."),
+            Instruction::Ret => {
+                let val = match self.stack_frames.last_mut() {
+                    None => panic!("No stack frames."),
+                    Some(frame) => frame.pop(),
                 };
-                return Some(i);
+
+                match val {
+                    Type::Address(address) => next = address,
+                    _ => panic!("Ret popped an non-address type from the stack."),
+                }
+            }
+            Instruction::Call(function) => {
+                let r9 = self.registers.clone(Register::R9);
+                let stack_frame = self
+                    .stack_frames
+                    .last_mut()
+                    .expect("There was no stack frame to take.");
+                let heap = self.heap.clone();
+
+                let ret = library::call(function.as_str(), r9, stack_frame, heap);
+                self.registers.insert(Register::R10, ret);
+            }
+            Instruction::Exit(t) => {
+                let code = AllotRuntime::get_int32(t, &mut self.registers);
+                return Some(code);
             }
             Instruction::Push(reg) => {
                 let val = self.registers.take(*reg);
@@ -157,8 +153,29 @@ impl AllotRuntime {
                     Some(reg) => self.registers.insert(*reg, val),
                 }
             }
-            Instruction::PopMany(_) => {}
-            Instruction::StackCpy(_, _) => {}
+            Instruction::PopMany(t) => {
+                let amount = AllotRuntime::get_uint(t, &mut self.registers);
+
+                match self.stack_frames.last_mut() {
+                    None => panic!("No stack frames."),
+                    Some(frame) => {
+                        for _ in 0..amount {
+                            frame.pop();
+                        }
+                    }
+                }
+            }
+            Instruction::StackCpy(reg, t) => {
+                let amount = AllotRuntime::get_uint(t, &mut self.registers);
+
+                match self.stack_frames.last_mut() {
+                    None => panic!("No stack frames."),
+                    Some(frame) => {
+                        let t = frame.clone_offset(amount);
+                        self.registers.insert(*reg, t);
+                    }
+                }
+            }
             Instruction::PushFrame(b) => self.stack_frames.push(StackFrame::new(*b)),
             Instruction::PopFrame => {
                 let val = self.stack_frames.pop();
@@ -166,10 +183,10 @@ impl AllotRuntime {
                     panic!("Could not pop stack frame.");
                 }
             }
-            Instruction::PushOnto(_) => {}
-            Instruction::PopInto => {}
-            Instruction::ThreadStart(_) => {}
-            Instruction::ThreadJoin(_) => {}
+            Instruction::PushOnto(_) => panic!("Not impl yet!"),
+            Instruction::PopInto => panic!("Not impl yet!"),
+            Instruction::ThreadStart(_) => panic!("Not impl yet!"),
+            Instruction::ThreadJoin(_) => panic!("Not impl yet!"),
             Instruction::Assert(reg, t) => {
                 // TODO: This is a kinda icky way to do this.
                 let val = self.registers.clone(*reg);
@@ -189,14 +206,28 @@ impl AllotRuntime {
             #[cfg(debug_assertions)]
             Instruction::Dbg(reg) => {
                 println!("Register {:?}", &reg);
-                let val = self.registers.get_mut(*reg);
+                let val = self.registers.get(*reg);
                 dbg!(val);
             }
             #[cfg(debug_assertions)]
-            Instruction::Dump => {}
+            Instruction::Dump(opts) => {
+                if opts & 0b00000001 != 0 {
+                    dbg!(&self.instructions);
+                }
+                if opts & 0b00000010 != 0 {
+                    dbg!(&self.labels);
+                }
+                if opts & 0b00000100 != 0 {
+                    dbg!(&self.registers);
+                }
+                if opts & 0b00001000 != 0 {
+                    dbg!(&self.stack_frames);
+                }
+                if opts & 0b00010000 != 0 {
+                    dbg!(&self.heap);
+                }
+            }
         }
-
-        // TODO: Instructions
 
         self.current = next;
         None
@@ -208,5 +239,42 @@ impl AllotRuntime {
             code = self.tick();
         }
         code.unwrap()
+    }
+}
+impl AllotRuntime {
+    #[inline]
+    fn get_uint(t: &Type, registers: &mut Registers) -> usize {
+        match t {
+            Type::UInt(i) => *i,
+            Type::Register(reg) => match registers.get(*reg) {
+                Type::UInt(i) => *i,
+                _ => panic!("Register did not hold a UInt type."),
+            },
+            _ => panic!("Type was not a UInt or Register."),
+        }
+    }
+
+    #[inline]
+    fn get_int32(t: &Type, registers: &mut Registers) -> i32 {
+        match t {
+            Type::Int32(i) => *i,
+            Type::Register(reg) => match registers.get(*reg) {
+                Type::Int32(i) => *i,
+                _ => panic!("Register did not hold a Int32 type."),
+            },
+            _ => panic!("Type was not a Int32 or Register."),
+        }
+    }
+
+    #[inline]
+    fn get_label(t: &Type, registers: &mut Registers) -> usize {
+        match t {
+            Type::Label(i) => *i,
+            Type::Register(reg) => match registers.get(*reg) {
+                Type::Label(i) => *i,
+                _ => panic!("Register did not hold a Label type."),
+            },
+            _ => panic!("Type was not a Label or Register."),
+        }
     }
 }
