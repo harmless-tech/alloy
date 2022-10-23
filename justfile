@@ -13,7 +13,7 @@ check:
     cargo clippy --all-targets --all-features --workspace -- -D warnings
 
 doc:
-    cargo doc --workspace --all-features --open
+    cargo doc --workspace --all-features --document-private-items --open
 
 test:
     cargo test --workspace --all-features
@@ -30,7 +30,7 @@ bench-native:
 build:
     cargo build --workspace
 
-build-release: check test
+buildr: check test
     cargo build --release --workspace
 
 publish-dry:
@@ -38,3 +38,9 @@ publish-dry:
     cargo package --list --allow-dirty -p allot_runtime
     cargo publish --dry-run --allow-dirty -p allot
     cargo package --list --allow-dirty -p allot
+
+run:
+    cargo run
+
+runr:
+    cargo run --release

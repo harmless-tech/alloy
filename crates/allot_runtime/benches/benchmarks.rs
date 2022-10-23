@@ -14,7 +14,7 @@ use mimalloc::MiMalloc;
 static GLOBAL: MiMalloc = MiMalloc;
 
 fn copy_speed(c: &mut Criterion) {
-    // mimalloc no guard: [390.62 ns 391.54 ns 392.42 ns]
+    // mimalloc no guard: [386.23 ns 387.11 ns 387.96 ns]
 
     c.bench_function("copy", |b| {
         b.iter(|| {

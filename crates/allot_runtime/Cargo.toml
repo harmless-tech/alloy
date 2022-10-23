@@ -3,7 +3,7 @@ name = "allot_runtime"
 version = "0.0.1-alpha"
 edition = "2021"
 authors = ["harmless-tech"]
-description = "A language runtime"
+description = "A highly experminal language runtime"
 readme = "README.md"
 homepage = "https://harmless.tech/languages/allot"
 repository = "https://github.com/harmless-tech/allot"
@@ -20,7 +20,7 @@ mimalloc = { version = "0.1.30", default-features = false }
 
 [features]
 default = []
-bytecode = []
+bytecode = [] # TODO: Move to own crate
 bytecode_gen = ["bytecode"]
 
 [[test]]
@@ -33,3 +33,4 @@ harness = false
 
 [package.metadata.docs.rs]
 all-features = true
+rustdoc-args = ["--document-private-items"]
