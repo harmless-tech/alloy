@@ -6,15 +6,29 @@ version = 3
 name = "allot"
 version = "0.0.1-alpha"
 dependencies = [
+ "allot_bytecode",
+ "allot_lib",
  "allot_runtime",
  "clap 4.0.18",
  "mimalloc",
 ]
 
 [[package]]
+name = "allot_bytecode"
+version = "0.0.1-alpha"
+dependencies = [
+ "allot_lib",
+]
+
+[[package]]
+name = "allot_lib"
+version = "0.0.1-alpha"
+
+[[package]]
 name = "allot_runtime"
 version = "0.0.1-alpha"
 dependencies = [
+ "allot_lib",
  "criterion",
  "mimalloc",
  "phf",

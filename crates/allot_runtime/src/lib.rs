@@ -2,32 +2,26 @@
 
 use std::sync::{Arc, RwLock};
 
-#[cfg(feature = "bytecode")]
-pub use bytecode::from_bytecode;
-#[cfg(feature = "bytecode_gen")]
-pub use bytecode::to_bytecode;
-use structures::*;
+use allot_lib::{Instruction, Register, Type};
 
-#[cfg(feature = "bytecode")]
-mod bytecode;
+use crate::memory::{CrossHeap, Heap, Registers, StackFrame};
+
 mod library;
-pub mod structures;
-mod traits;
+mod memory;
+mod operations;
 
 pub struct AllotRuntime {
     current: usize,
     instructions: Vec<Instruction>,
-    labels: Vec<usize>,
     registers: Registers,
     stack_frames: Vec<StackFrame>,
     heap: CrossHeap,
     is_thread: bool,
 }
 impl AllotRuntime {
-    pub fn new(instructions: Vec<Instruction>, labels: Vec<usize>) -> Self {
+    pub fn new(instructions: Vec<Instruction>) -> Self {
         Self {
             instructions,
-            labels,
             registers: Registers::new(),
             stack_frames: vec![StackFrame::default()],
             heap: Arc::new(RwLock::new(Heap::default())),
@@ -36,8 +30,8 @@ impl AllotRuntime {
         }
     }
 
-    pub fn new_thread(instructions: Vec<Instruction>, labels: Vec<usize>) -> Self {
-        let mut s = AllotRuntime::new(instructions, labels);
+    pub fn new_thread(instructions: Vec<Instruction>) -> Self {
+        let mut s = AllotRuntime::new(instructions);
         s.is_thread = true;
 
         s
@@ -52,14 +46,9 @@ impl AllotRuntime {
 
         match instruction {
             Instruction::Nop => {}
-            Instruction::Op(op, regs) => {
-                op.solve(&mut self.registers, regs);
-            }
+            Instruction::Op(op, regs) => operations::solve(op, &mut self.registers, regs),
             Instruction::Mov(reg, t) => {
                 let val = match t {
-                    Type::Pointer(_) | Type::Label(_) | Type::Address(_) | Type::Thread(_) => {
-                        panic!("Attempted to move impossible type into a register.")
-                    }
                     Type::Register(reg) => self.registers.take(*reg),
                     _ => t.clone(),
                 };
@@ -71,15 +60,9 @@ impl AllotRuntime {
                 self.registers.insert(*reg1, val.clone())
             }
             Instruction::Cast(_, _) => {} // TODO: MVP
-            Instruction::Lea(reg, label) => {
-                let val = match self.labels.get(*label) {
-                    None => panic!("Label {label} was not found."),
-                    Some(l) => *l,
-                };
-                self.registers.insert(*reg, Type::Label(val));
-            }
+            Instruction::Lea(reg, address) => self.registers.insert(*reg, Type::Address(*address)),
             Instruction::Jmp(opt_reg, t) => {
-                let label = AllotRuntime::get_label(t, &mut self.registers);
+                let address = AllotRuntime::get_address(t, &mut self.registers);
 
                 let jmp = match opt_reg {
                     None => true,
@@ -95,7 +78,7 @@ impl AllotRuntime {
                 };
 
                 if jmp {
-                    next = label;
+                    next = address;
                 }
             }
             Instruction::Ret => {
@@ -185,12 +168,12 @@ impl AllotRuntime {
             }
             Instruction::PushOnto(_) => panic!("Not impl yet!"),
             Instruction::PopInto => panic!("Not impl yet!"),
-            Instruction::ThreadStart(_) => panic!("Not impl yet!"),
-            Instruction::ThreadJoin(_) => panic!("Not impl yet!"),
             Instruction::Assert(reg, t) => {
+                use allot_lib::OpPrim2;
+
                 // TODO: This is a kinda icky way to do this.
                 let val = self.registers.clone(*reg);
-                let result = OpPrim2::Equal.solve(val, t.clone());
+                let result = operations::solve_2(&OpPrim2::Equal, val, t.clone());
                 if let Type::Boolean(b) = result {
                     // println!("Assert: {:?} is {:?}: {}", reg, t, &b); TODO: Should assert have an output?
                     if !b {
@@ -215,15 +198,12 @@ impl AllotRuntime {
                     dbg!(&self.instructions);
                 }
                 if opts & 0b00000010 != 0 {
-                    dbg!(&self.labels);
-                }
-                if opts & 0b00000100 != 0 {
                     dbg!(&self.registers);
                 }
-                if opts & 0b00001000 != 0 {
+                if opts & 0b00000100 != 0 {
                     dbg!(&self.stack_frames);
                 }
-                if opts & 0b00010000 != 0 {
+                if opts & 0b00001000 != 0 {
                     dbg!(&self.heap);
                 }
             }
@@ -267,11 +247,11 @@ impl AllotRuntime {
     }
 
     #[inline]
-    fn get_label(t: &Type, registers: &mut Registers) -> usize {
+    fn get_address(t: &Type, registers: &mut Registers) -> usize {
         match t {
-            Type::Label(i) => *i,
+            Type::Address(i) => *i,
             Type::Register(reg) => match registers.get(*reg) {
-                Type::Label(i) => *i,
+                Type::Address(i) => *i,
                 _ => panic!("Register did not hold a Label type."),
             },
             _ => panic!("Type was not a Label or Register."),

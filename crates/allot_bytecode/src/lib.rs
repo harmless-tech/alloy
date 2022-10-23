@@ -1,4 +1,17 @@
-use crate::{OpPrim1, OpPrim2, Operation, RawType, Register};
+#[cfg(feature = "gen")]
+mod gen;
+#[cfg(feature = "parse")]
+mod parse;
+
+use allot_lib::{OpPrim1, OpPrim2, Operation, RawInstruction, RawType, Register};
+#[cfg(feature = "gen")]
+pub use gen::gen;
+#[cfg(feature = "parse")]
+pub use parse::parse;
+
+// TODO: Allow some data about the program to be stored.
+#[allow(dead_code)] // TODO: Remove
+const BYTECODE_VERSION: usize = 0;
 
 pub trait ByteForm {
     fn to_byte(&self) -> u8;
@@ -6,7 +19,67 @@ pub trait ByteForm {
 }
 
 // Instructions
-// TODO: Instructions.
+
+impl ByteForm for RawInstruction {
+    fn to_byte(&self) -> u8 {
+        match self {
+            RawInstruction::Nop => 0,
+            RawInstruction::Op => 1,
+            RawInstruction::Mov => 2,
+            RawInstruction::Cpy => 3,
+            RawInstruction::Cast => 4,
+            RawInstruction::Lea => 5,
+            RawInstruction::Jmp => 6,
+            RawInstruction::Ret => 7,
+            RawInstruction::Call => 8,
+            RawInstruction::Exit => 9,
+            RawInstruction::Push => 10,
+            RawInstruction::PushCpy => 11,
+            RawInstruction::Pop => 12,
+            RawInstruction::PopMany => 13,
+            RawInstruction::StackCpy => 14,
+            RawInstruction::PushFrame => 15,
+            RawInstruction::PopFrame => 16,
+            RawInstruction::PushOnto => 17,
+            RawInstruction::PopInto => 18,
+            RawInstruction::Assert => 19,
+            #[cfg(debug_assertions)]
+            RawInstruction::Dbg => 128,
+            #[cfg(debug_assertions)]
+            RawInstruction::Dump => 129,
+        }
+    }
+
+    fn from_byte(byte: u8) -> Self {
+        match byte {
+            0 => RawInstruction::Nop,
+            1 => RawInstruction::Op,
+            2 => RawInstruction::Mov,
+            3 => RawInstruction::Cpy,
+            4 => RawInstruction::Cast,
+            5 => RawInstruction::Lea,
+            6 => RawInstruction::Jmp,
+            7 => RawInstruction::Ret,
+            8 => RawInstruction::Call,
+            9 => RawInstruction::Exit,
+            10 => RawInstruction::Push,
+            11 => RawInstruction::PushCpy,
+            12 => RawInstruction::Pop,
+            13 => RawInstruction::PopMany,
+            14 => RawInstruction::StackCpy,
+            15 => RawInstruction::PushFrame,
+            16 => RawInstruction::PopFrame,
+            17 => RawInstruction::PushOnto,
+            18 => RawInstruction::PopInto,
+            19 => RawInstruction::Assert,
+            #[cfg(debug_assertions)]
+            128 => RawInstruction::Dbg,
+            #[cfg(debug_assertions)]
+            129 => RawInstruction::Dump,
+            _ => panic!("Invalid Instruction byte: {byte}"),
+        }
+    }
+}
 
 // Registers
 
@@ -87,41 +160,6 @@ impl ByteForm for Register {
 
 // Types
 
-// TODO: Is this needed for types?
-// impl ByteForm for Type {
-//     fn to_byte(&self) -> u8 {
-//         self.to_raw().to_byte()
-//     }
-//
-//     fn from_byte(byte: u8) -> Self {
-//         match byte {
-//             0 => Type::None,
-//             1 => Type::Int8(0),
-//             2 => Type::Int16(0),
-//             3 => Type::Int32(0),
-//             4 => Type::Int(0),
-//             5 => Type::Int64(0),
-//             6 => Type::Int128(0),
-//             7 => Type::UInt8(0),
-//             8 => Type::UInt16(0),
-//             9 => Type::UInt32(0),
-//             10 => Type::UInt(0),
-//             11 => Type::UInt64(0),
-//             12 => Type::UInt128(0),
-//             13 => Type::Float32(0.0),
-//             14 => Type::Float64(0.0),
-//             15 => Type::Char(' '),
-//             16 => Type::String(String::new()),
-//             17 => Type::Boolean(false),
-//             18 => Type::Pointer(0),
-//             19 => Type::Label(0),
-//             20 => Type::Register(Register::None),
-//             // 21 => Type::Thread(),
-//             _ => panic!("Invalid Type byte: {byte}"),
-//         }
-//     }
-// }
-
 impl ByteForm for RawType {
     fn to_byte(&self) -> u8 {
         match self {
@@ -143,11 +181,9 @@ impl ByteForm for RawType {
             RawType::Char => 15,
             RawType::String => 16,
             RawType::Boolean => 17,
-            RawType::Pointer => 18,
-            RawType::Label => 19,
-            RawType::Address => 20,
-            RawType::Register => 21,
-            RawType::Thread => 22,
+            RawType::Address => 18,
+            RawType::Pointer => 19,
+            RawType::Register => 20,
         }
     }
 
@@ -171,12 +207,10 @@ impl ByteForm for RawType {
             15 => RawType::Char,
             16 => RawType::String,
             17 => RawType::Boolean,
-            18 => RawType::Pointer,
-            19 => RawType::Label,
-            20 => RawType::Address,
-            21 => RawType::Register,
-            22 => RawType::Thread,
-            _ => panic!("Invalid RawType byte: {byte}"),
+            18 => RawType::Address,
+            19 => RawType::Pointer,
+            20 => RawType::Register,
+            _ => panic!("Invalid Type byte: {byte}"),
         }
     }
 }
@@ -246,6 +280,7 @@ impl ByteForm for OpPrim2 {
             OpPrim2::BitwiseXor => 16,
             OpPrim2::ShiftLeft => 17,
             OpPrim2::ShiftRight => 18,
+            OpPrim2::SameType => 19,
         }
     }
 
@@ -270,6 +305,7 @@ impl ByteForm for OpPrim2 {
             16 => OpPrim2::BitwiseXor,
             17 => OpPrim2::ShiftLeft,
             18 => OpPrim2::ShiftRight,
+            19 => OpPrim2::SameType,
             _ => panic!("Invalid OpPrim2 byte: {byte}"),
         }
     }

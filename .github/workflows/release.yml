@@ -302,6 +302,8 @@ jobs:
         run: rustc --version
       - name: Publish
         run: |
+          cargo publish --token ${CRATES_TOKEN} -p allot_lib
+          cargo publish --token ${CRATES_TOKEN} -p allot_bytecode
           cargo publish --token ${CRATES_TOKEN} -p allot_runtime
           cargo publish --token ${CRATES_TOKEN} -p allot
         env:

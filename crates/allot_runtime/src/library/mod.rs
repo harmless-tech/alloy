@@ -1,6 +1,6 @@
 // TODO: Allow optional libraries, like gui? (wasm plugins?)
 
-mod standard; // TODO: Allow for std to be removed.
+mod standard;
 
 use std::{
     io,
@@ -56,10 +56,8 @@ fn print(arg: Type, _stack_frame: &mut StackFrame, _heap: CrossHeap) -> Type {
         Type::String(v) => print!("{}", v),
         Type::Boolean(v) => print!("{}", v),
         Type::Pointer(v) => print!("{:X?}", v),
-        Type::Label(v) => print!("{}", v),
         Type::Address(v) => print!("{:X?}", v),
         Type::Register(v) => print!("{:?}", v),
-        Type::Thread(_) => panic!("Cannot print Thread type."),
     }
     Type::None
 }
@@ -91,10 +89,8 @@ fn i_println(arg: Type) {
         Type::String(v) => println!("{}", v),
         Type::Boolean(v) => println!("{}", v),
         Type::Pointer(v) => println!("{:X?}", v),
-        Type::Label(v) => println!("{}", v),
         Type::Address(v) => println!("{:X?}", v),
         Type::Register(v) => println!("{:?}", v),
-        Type::Thread(_) => panic!("Cannot print Thread type."),
     }
 }
 

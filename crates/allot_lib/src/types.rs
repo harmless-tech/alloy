@@ -1,6 +1,4 @@
-use std::rc::Rc;
-
-use crate::{Register, StackFrame};
+use crate::Register;
 
 #[derive(Clone, Debug)]
 pub enum Type {
@@ -29,11 +27,11 @@ pub enum Type {
 
     // Other
     Boolean(bool),
-    Pointer(usize),
-    Label(usize),
     Address(usize),
+    Pointer(usize),
     Register(Register),
-    Thread(Rc<std::thread::JoinHandle<(Option<i32>, StackFrame)>>), // Exit, StackFrame
+    //TODO: Handle this with library function.
+    // Thread(Rc<std::thread::JoinHandle<(Option<i32>, StackFrame)>>), // Exit, StackFrame
 }
 impl Type {
     pub fn to_raw(&self) -> RawType {
@@ -56,16 +54,14 @@ impl Type {
             Type::Char(_) => RawType::Char,
             Type::String(_) => RawType::String,
             Type::Boolean(_) => RawType::Boolean,
-            Type::Pointer(_) => RawType::Pointer,
-            Type::Label(_) => RawType::Label,
             Type::Address(_) => RawType::Address,
+            Type::Pointer(_) => RawType::Pointer,
             Type::Register(_) => RawType::Register,
-            Type::Thread(_) => RawType::Thread,
         }
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RawType {
     None,
 
@@ -92,21 +88,7 @@ pub enum RawType {
 
     // Other
     Boolean,
-    Pointer,
-    Label,
     Address,
+    Pointer,
     Register,
-    Thread,
-}
-
-/// HeapTypes can only be managed by function calls.
-#[derive(Debug)]
-pub enum HeapType {
-    None,
-    Type(Box<Type>),
-    // File
-    // Vec
-    // Tuple?
-    // HashSet
-    // HashMap
 }

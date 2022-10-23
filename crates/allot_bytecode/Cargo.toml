@@ -1,5 +1,5 @@
 [package]
-name = "allot_runtime"
+name = "allot_bytecode"
 version = "0.0.1-alpha"
 edition = "2021"
 authors = ["harmless-tech"]
@@ -13,22 +13,11 @@ license = "MIT"
 
 [dependencies]
 allot_lib = { version = "0.0.1-alpha", path = "../allot_lib" }
-phf = { version = "0.11.1", features = ["macros"] }
 
-[dev-dependencies]
-criterion = "0.4.0"
-mimalloc = { version = "0.1.30", default-features = false }
-
-#[features]
-#default = []
-
-[[test]]
-name = "tests"
-path = "tests/tests.rs"
-
-[[bench]]
-name = "benchmarks"
-harness = false
+[features]
+default = ["gen", "parse"]
+gen = []
+parse = []
 
 [package.metadata.docs.rs]
 all-features = true
