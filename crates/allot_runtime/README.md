@@ -4,5 +4,5 @@ Currently, a heavy work in-progress. Check back later for documentation and a be
 
 ### Some Plans
 
-- Wasm plugins.
+- Wasm plugins. (Instruction::Extern(module, function))
 - All panics should become Result<_, Error>.

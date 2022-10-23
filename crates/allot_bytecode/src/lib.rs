@@ -1,316 +1,259 @@
+mod forms;
 #[cfg(feature = "gen")]
 mod gen;
 #[cfg(feature = "parse")]
 mod parse;
 
-use allot_lib::{OpPrim1, OpPrim2, Operation, RawInstruction, RawType, Register};
+use std::mem::size_of;
+
+pub use forms::*;
 #[cfg(feature = "gen")]
 pub use gen::gen;
 #[cfg(feature = "parse")]
 pub use parse::parse;
 
+/// For now the layout of allot files the BYTECODE_VERSION, then just a linear list of instructions.
+
 // TODO: Allow some data about the program to be stored.
 #[allow(dead_code)] // TODO: Remove
-const BYTECODE_VERSION: usize = 0;
+pub const BYTECODE_VERSION: usize = 0;
 
-pub trait ByteForm {
-    fn to_byte(&self) -> u8;
-    fn from_byte(byte: u8) -> Self; // TODO: Result type instead of panic?
-}
-
-// Instructions
-
-impl ByteForm for RawInstruction {
-    fn to_byte(&self) -> u8 {
-        match self {
-            RawInstruction::Nop => 0,
-            RawInstruction::Op => 1,
-            RawInstruction::Mov => 2,
-            RawInstruction::Cpy => 3,
-            RawInstruction::Cast => 4,
-            RawInstruction::Lea => 5,
-            RawInstruction::Jmp => 6,
-            RawInstruction::Ret => 7,
-            RawInstruction::Call => 8,
-            RawInstruction::Exit => 9,
-            RawInstruction::Push => 10,
-            RawInstruction::PushCpy => 11,
-            RawInstruction::Pop => 12,
-            RawInstruction::PopMany => 13,
-            RawInstruction::StackCpy => 14,
-            RawInstruction::PushFrame => 15,
-            RawInstruction::PopFrame => 16,
-            RawInstruction::PushOnto => 17,
-            RawInstruction::PopInto => 18,
-            RawInstruction::ThreadCreate => 19,
-            RawInstruction::ThreadJoin => 20,
-            RawInstruction::Assert => 21,
-            #[cfg(debug_assertions)]
-            RawInstruction::Dbg => 128,
-            #[cfg(debug_assertions)]
-            RawInstruction::Dump => 129,
-        }
+#[derive(Clone, Debug, Default)]
+pub struct Buffer(Vec<u8>);
+impl Buffer {
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    fn from_byte(byte: u8) -> Self {
-        match byte {
-            0 => RawInstruction::Nop,
-            1 => RawInstruction::Op,
-            2 => RawInstruction::Mov,
-            3 => RawInstruction::Cpy,
-            4 => RawInstruction::Cast,
-            5 => RawInstruction::Lea,
-            6 => RawInstruction::Jmp,
-            7 => RawInstruction::Ret,
-            8 => RawInstruction::Call,
-            9 => RawInstruction::Exit,
-            10 => RawInstruction::Push,
-            11 => RawInstruction::PushCpy,
-            12 => RawInstruction::Pop,
-            13 => RawInstruction::PopMany,
-            14 => RawInstruction::StackCpy,
-            15 => RawInstruction::PushFrame,
-            16 => RawInstruction::PopFrame,
-            17 => RawInstruction::PushOnto,
-            18 => RawInstruction::PopInto,
-            19 => RawInstruction::ThreadCreate,
-            20 => RawInstruction::ThreadJoin,
-            21 => RawInstruction::Assert,
-            #[cfg(debug_assertions)]
-            128 => RawInstruction::Dbg,
-            #[cfg(debug_assertions)]
-            129 => RawInstruction::Dump,
-            _ => panic!("Invalid Instruction byte: {byte}"),
-        }
-    }
-}
-
-// Registers
-
-impl ByteForm for Register {
-    fn to_byte(&self) -> u8 {
-        match self {
-            Register::R0 => 0,
-            Register::R1 => 1,
-            Register::R2 => 2,
-            Register::R3 => 3,
-            Register::R4 => 4,
-            Register::R5 => 5,
-            Register::R6 => 6,
-            Register::R7 => 7,
-            Register::R8 => 8,
-            Register::R9 => 9,
-            Register::R10 => 10,
-            Register::R11 => 11,
-            Register::R12 => 12,
-            Register::R13 => 13,
-            Register::R14 => 14,
-            Register::R15 => 15,
-            Register::R16 => 16,
-            Register::R17 => 17,
-            Register::R18 => 18,
-            Register::R19 => 19,
-            Register::R20 => 20,
-            Register::R21 => 21,
-            Register::R22 => 22,
-            Register::R23 => 23,
-            Register::R24 => 24,
-            Register::R25 => 25,
-            Register::R26 => 26,
-            Register::R27 => 27,
-            Register::R28 => 28,
-            Register::R29 => 29,
-            Register::None => 255,
-        }
+    pub fn with(vec: Vec<u8>) -> Self {
+        Self(vec)
     }
 
-    fn from_byte(byte: u8) -> Self {
-        match byte {
-            0 => Register::R0,
-            1 => Register::R1,
-            2 => Register::R2,
-            3 => Register::R3,
-            4 => Register::R4,
-            5 => Register::R5,
-            6 => Register::R6,
-            7 => Register::R7,
-            8 => Register::R8,
-            9 => Register::R9,
-            10 => Register::R10,
-            11 => Register::R11,
-            12 => Register::R12,
-            13 => Register::R13,
-            14 => Register::R14,
-            15 => Register::R15,
-            16 => Register::R16,
-            17 => Register::R17,
-            18 => Register::R18,
-            19 => Register::R19,
-            20 => Register::R20,
-            21 => Register::R21,
-            22 => Register::R22,
-            23 => Register::R23,
-            24 => Register::R24,
-            25 => Register::R25,
-            26 => Register::R26,
-            27 => Register::R27,
-            28 => Register::R28,
-            29 => Register::R29,
-            255 => Register::None,
-            _ => panic!("Invalid Register byte: {byte}"),
-        }
-    }
-}
+    // Write
 
-// Types
-
-impl ByteForm for RawType {
-    fn to_byte(&self) -> u8 {
-        match self {
-            RawType::None => 0,
-            RawType::Int8 => 1,
-            RawType::Int16 => 2,
-            RawType::Int32 => 3,
-            RawType::Int => 4,
-            RawType::Int64 => 5,
-            RawType::Int128 => 6,
-            RawType::UInt8 => 7,
-            RawType::UInt16 => 8,
-            RawType::UInt32 => 9,
-            RawType::UInt => 10,
-            RawType::UInt64 => 11,
-            RawType::UInt128 => 12,
-            RawType::Float32 => 13,
-            RawType::Float64 => 14,
-            RawType::Char => 15,
-            RawType::String => 16,
-            RawType::Boolean => 17,
-            RawType::Address => 18,
-            RawType::Pointer => 19,
-            RawType::Register => 20,
-        }
+    pub fn write_i8(&mut self, data: i8) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
     }
 
-    fn from_byte(byte: u8) -> Self {
-        match byte {
-            0 => RawType::None,
-            1 => RawType::Int8,
-            2 => RawType::Int16,
-            3 => RawType::Int32,
-            4 => RawType::Int,
-            5 => RawType::Int64,
-            6 => RawType::Int128,
-            7 => RawType::UInt8,
-            8 => RawType::UInt16,
-            9 => RawType::UInt32,
-            10 => RawType::UInt,
-            11 => RawType::UInt64,
-            12 => RawType::UInt128,
-            13 => RawType::Float32,
-            14 => RawType::Float64,
-            15 => RawType::Char,
-            16 => RawType::String,
-            17 => RawType::Boolean,
-            18 => RawType::Address,
-            19 => RawType::Pointer,
-            20 => RawType::Register,
-            _ => panic!("Invalid Type byte: {byte}"),
-        }
-    }
-}
-
-// Operations
-
-impl ByteForm for Operation {
-    fn to_byte(&self) -> u8 {
-        match self {
-            Operation::Prim1(op) => op.to_byte(),
-            Operation::Prim2(op) => (0b10000000) | op.to_byte(),
-        }
+    pub fn write_i16(&mut self, data: i16) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
     }
 
-    fn from_byte(byte: u8) -> Self {
-        let op = (byte & 0b10000000) >> 7;
-        let t = byte & 0b01111111;
-
-        match op {
-            0 => Operation::Prim1(OpPrim1::from_byte(t)),
-            1 => Operation::Prim2(OpPrim2::from_byte(t)),
-            _ => panic!("Invalid Operation byte: {byte}"),
-        }
-    }
-}
-
-impl ByteForm for OpPrim1 {
-    fn to_byte(&self) -> u8 {
-        match self {
-            OpPrim1::Increment => 0,
-            OpPrim1::Decrement => 1,
-            OpPrim1::Not => 2,
-            OpPrim1::BitwiseNot => 3,
-        }
+    pub fn write_i32(&mut self, data: i32) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
     }
 
-    fn from_byte(byte: u8) -> Self {
-        match byte {
-            0 => OpPrim1::Increment,
-            1 => OpPrim1::Decrement,
-            2 => OpPrim1::Not,
-            3 => OpPrim1::BitwiseNot,
-            _ => panic!("Invalid OpPrim1 byte: {byte}"),
-        }
-    }
-}
-
-impl ByteForm for OpPrim2 {
-    fn to_byte(&self) -> u8 {
-        match self {
-            OpPrim2::Add => 0,
-            OpPrim2::Subtract => 1,
-            OpPrim2::Multiplication => 2,
-            OpPrim2::Division => 3,
-            OpPrim2::Modulus => 4,
-            OpPrim2::And => 5,
-            OpPrim2::Or => 6,
-            OpPrim2::Xor => 7,
-            OpPrim2::Equal => 8,
-            OpPrim2::NotEqual => 9,
-            OpPrim2::Greater => 10,
-            OpPrim2::Less => 11,
-            OpPrim2::GreaterEqual => 12,
-            OpPrim2::LessEqual => 13,
-            OpPrim2::BitwiseAnd => 14,
-            OpPrim2::BitwiseOr => 15,
-            OpPrim2::BitwiseXor => 16,
-            OpPrim2::ShiftLeft => 17,
-            OpPrim2::ShiftRight => 18,
-            OpPrim2::SameType => 19,
-        }
+    pub fn write_i64(&mut self, data: i64) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
     }
 
-    fn from_byte(byte: u8) -> Self {
-        match byte {
-            0 => OpPrim2::Add,
-            1 => OpPrim2::Subtract,
-            2 => OpPrim2::Multiplication,
-            3 => OpPrim2::Division,
-            4 => OpPrim2::Modulus,
-            5 => OpPrim2::And,
-            6 => OpPrim2::Or,
-            7 => OpPrim2::Xor,
-            8 => OpPrim2::Equal,
-            9 => OpPrim2::NotEqual,
-            10 => OpPrim2::Greater,
-            11 => OpPrim2::Less,
-            12 => OpPrim2::GreaterEqual,
-            13 => OpPrim2::LessEqual,
-            14 => OpPrim2::BitwiseAnd,
-            15 => OpPrim2::BitwiseOr,
-            16 => OpPrim2::BitwiseXor,
-            17 => OpPrim2::ShiftLeft,
-            18 => OpPrim2::ShiftRight,
-            19 => OpPrim2::SameType,
-            _ => panic!("Invalid OpPrim2 byte: {byte}"),
-        }
+    pub fn write_i128(&mut self, data: i128) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_u8(&mut self, data: u8) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_u16(&mut self, data: u16) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_u32(&mut self, data: u32) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_u64(&mut self, data: u64) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_u128(&mut self, data: u128) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_f32(&mut self, data: f32) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_f64(&mut self, data: f64) {
+        let buffer = &(data).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_char(&mut self, data: char) {
+        let buffer = &(data as u32).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_str(&mut self, data: &str) {
+        let buffer = data.as_bytes();
+
+        self.write_u64(data.len() as u64);
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_string(&mut self, data: &String) {
+        let buffer = data.as_bytes();
+
+        self.write_u64(data.len() as u64);
+        self.0.extend_from_slice(buffer);
+    }
+
+    pub fn write_bool(&mut self, data: bool) {
+        let buffer = &(data as u8).to_le_bytes();
+        self.0.extend_from_slice(buffer);
+    }
+
+    // Read
+
+    pub fn read_i8(&mut self) -> i8 {
+        let v: [u8; size_of::<i8>()] = self
+            .0
+            .drain(0..size_of::<i8>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        i8::from_le_bytes(v)
+    }
+
+    pub fn read_i16(&mut self) -> i16 {
+        let v: [u8; size_of::<i16>()] = self
+            .0
+            .drain(0..size_of::<i16>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        i16::from_le_bytes(v)
+    }
+
+    pub fn read_i32(&mut self) -> i32 {
+        let v: [u8; size_of::<i32>()] = self
+            .0
+            .drain(0..size_of::<i32>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        i32::from_le_bytes(v)
+    }
+
+    pub fn read_i64(&mut self) -> i64 {
+        let v: [u8; size_of::<i64>()] = self
+            .0
+            .drain(0..size_of::<i64>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        i64::from_le_bytes(v)
+    }
+
+    pub fn read_i128(&mut self) -> i128 {
+        let v: [u8; size_of::<i128>()] = self
+            .0
+            .drain(0..size_of::<i128>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        i128::from_le_bytes(v)
+    }
+
+    pub fn read_u8(&mut self) -> u8 {
+        let v: [u8; size_of::<u8>()] = self
+            .0
+            .drain(0..size_of::<u8>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        u8::from_le_bytes(v)
+    }
+
+    pub fn read_u16(&mut self) -> u16 {
+        let v: [u8; size_of::<u16>()] = self
+            .0
+            .drain(0..size_of::<u16>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        u16::from_le_bytes(v)
+    }
+
+    pub fn read_u32(&mut self) -> u32 {
+        let v: [u8; size_of::<u32>()] = self
+            .0
+            .drain(0..size_of::<u32>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        u32::from_le_bytes(v)
+    }
+
+    pub fn read_u64(&mut self) -> u64 {
+        let v: [u8; size_of::<u64>()] = self
+            .0
+            .drain(0..size_of::<u64>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        u64::from_le_bytes(v)
+    }
+
+    pub fn read_u128(&mut self) -> u128 {
+        let v: [u8; size_of::<u128>()] = self
+            .0
+            .drain(0..size_of::<u128>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        u128::from_le_bytes(v)
+    }
+
+    pub fn read_f32(&mut self) -> f32 {
+        let v: [u8; size_of::<f32>()] = self
+            .0
+            .drain(0..size_of::<f32>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        f32::from_le_bytes(v)
+    }
+
+    pub fn read_f64(&mut self) -> f64 {
+        let v: [u8; size_of::<f64>()] = self
+            .0
+            .drain(0..size_of::<f64>())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
+        f64::from_le_bytes(v)
+    }
+
+    pub fn read_char(&mut self) -> char {
+        let num = self.read_u32();
+        char::from_u32(num).unwrap()
+    }
+
+    pub fn read_str(&mut self) -> String {
+        self.read_string()
+    }
+
+    pub fn read_string(&mut self) -> String {
+        let len = self.read_u64() as usize;
+        let v: Vec<u8> = self.0.drain(0..len).collect();
+        String::from_utf8(v).unwrap()
+    }
+
+    pub fn read_bool(&mut self) -> bool {
+        let num = self.read_u8();
+        !matches!(num, 0)
     }
 }

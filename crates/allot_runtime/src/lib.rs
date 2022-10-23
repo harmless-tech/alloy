@@ -10,6 +10,8 @@ mod library;
 mod memory;
 mod operations;
 
+// TODO: This should reexport allot_lib stuff.
+
 pub struct AllotRuntime {
     current: usize,
     instructions: Arc<Vec<Instruction>>,

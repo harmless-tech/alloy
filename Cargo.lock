@@ -18,6 +18,7 @@ name = "allot_bytecode"
 version = "0.0.1-alpha"
 dependencies = [
  "allot_lib",
+ "mimalloc",
 ]
 
 [[package]]
