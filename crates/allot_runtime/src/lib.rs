@@ -79,7 +79,11 @@ impl AllotRuntime {
                 let val = self.registers.get(*reg2);
                 self.registers.insert(*reg1, val.clone())
             }
-            Instruction::Cast(_, _) => {} // TODO: MVP
+            Instruction::Cast(reg, raw) => {
+                let val = self.registers.get(*reg);
+                let casted = operations::cast(val, *raw);
+                self.registers.insert(*reg, casted);
+            }
             Instruction::Lea(reg, address) => self.registers.insert(*reg, Type::Address(*address)),
             Instruction::Jmp(opt_reg, t) => {
                 let address = AllotRuntime::get_address(t, &mut self.registers);

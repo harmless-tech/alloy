@@ -11,7 +11,7 @@ pub enum Instruction {
     /// Moves the value in the second register to the first register.
     Mov(Register, Type),
     /// Copies the value in the second register and puts it in the first register.
-    /// May fail if the type cannot be copied.
+    /// Cpy may be faster than move when the amount of data is small.
     Cpy(Register, Register),
 
     /// Attempts the cast the value in the register to another type.

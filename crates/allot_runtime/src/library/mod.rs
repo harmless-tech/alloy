@@ -25,6 +25,13 @@ static FUNCTIONS: phf::Map<&'static str, LibraryFunction> = phf_map! {
 
     // Threads
     "thread::sleep" => thread::sleep,
+
+    // Errors
+    // "error" => error,
+
+    // String
+    // "string::to_u8"
+    //TODO Allow RawTypes as type? Or just use a UInt to convert.
 };
 
 pub fn call(function: &str, arg: Type, stack_frame: &mut StackFrame, heap: &CrossHeap) -> Type {
