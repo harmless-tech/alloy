@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use allot_lib::{
     Instruction::{Assert, Cpy, Exit, Mov},
     Register::{R1, R10, R2, R3, R4, R5, R6, R7, R8, R9},
@@ -11,25 +13,28 @@ use mimalloc::MiMalloc;
 static GLOBAL: MiMalloc = MiMalloc;
 
 fn copy_speed(c: &mut Criterion) {
-    // mimalloc no guard: [351.27 ns 351.70 ns 352.14 ns]
+    // mimalloc no guard: [364.96 ns 365.88 ns 366.78 ns]
+
+    let instructions = &Arc::new(vec![
+        Mov(R1, Type::UInt(50)),
+        Assert(R1, Type::UInt(50)),
+        Cpy(R2, R1),
+        Cpy(R3, R1),
+        Cpy(R4, R1),
+        Cpy(R5, R1),
+        Cpy(R6, R1),
+        Cpy(R7, R1),
+        Cpy(R8, R1),
+        Cpy(R9, R1),
+        Cpy(R10, R1),
+        Cpy(R2, R1),
+        Exit(Type::Int32(512)),
+    ]);
 
     c.bench_function("copy", |b| {
         b.iter(|| {
-            let mut runtime = AllotRuntime::new(vec![
-                Mov(R1, Type::UInt(50)),
-                Assert(R1, Type::UInt(50)),
-                Cpy(R2, R1),
-                Cpy(R3, R1),
-                Cpy(R4, R1),
-                Cpy(R5, R1),
-                Cpy(R6, R1),
-                Cpy(R7, R1),
-                Cpy(R8, R1),
-                Cpy(R9, R1),
-                Cpy(R10, R1),
-                Cpy(R2, R1),
-                Exit(Type::Int32(512)),
-            ]);
+            let i = instructions.clone();
+            let mut runtime = AllotRuntime::new_arc(i);
             runtime.run();
         })
     });

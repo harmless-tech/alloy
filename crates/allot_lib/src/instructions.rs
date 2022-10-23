@@ -27,7 +27,7 @@ pub enum Instruction {
     /// Calls a function, functions get access to the current stack frame, read-only access to register 9, write-only access to register 10, and access to the heap.
     Call(String),
 
-    /// Exits the program with the int.
+    /// Exits the program with the int. (Does nothing on threads currently)
     Exit(Type), // Type = Int32 | Register
 
     /// Pushes the value in the register onto the stack in the current stack frame.
@@ -51,14 +51,14 @@ pub enum Instruction {
     /// May fail if the last stack frame is isolated.
     PopInto,
 
-    // /// Takes the current stack frame (Errors if it is the root stack frame) and runs it on a new thread starting at the label.
-    // /// Threads have their own registers and stack frames, the heap is shared between all threads.
-    // /// Puts its handle into register 0.
-    // #[deprecated(note = "This will be handled by a library function instead.")]
-    // ThreadStart(Type), // Type = Label || Register
-    // /// Joins a thread and pushes its stack frame.
-    // #[deprecated(note = "This will be handled by a library function instead.")]
-    // ThreadJoin(Register),
+    /// Takes the current stack frame (Errors if it is the root stack frame) and runs it on a new thread starting at the label.
+    /// Threads have their own registers and stack frames, the heap is shared between all threads.
+    /// Puts its handle into register 0.
+    /// To stop the thread use Instruction::Exit.
+    ThreadCreate(Type), // Type = Address || Register
+    /// Joins a thread and pushes its stack frame. Accepts a pointer to its join handle.
+    /// Puts the i32 return value into register 0, pushes the StackFrame from the thread.
+    ThreadJoin(Register),
     /// Asserts that a register is equal to a type. Should only be used in debug builds of your allot program.
     Assert(Register, Type),
 
@@ -91,6 +91,8 @@ impl Instruction {
             Instruction::PopFrame => RawInstruction::PopFrame,
             Instruction::PushOnto(_) => RawInstruction::PushOnto,
             Instruction::PopInto => RawInstruction::PopInto,
+            Instruction::ThreadCreate(_) => RawInstruction::ThreadCreate,
+            Instruction::ThreadJoin(_) => RawInstruction::ThreadJoin,
             Instruction::Assert(_, _) => RawInstruction::Assert,
             #[cfg(debug_assertions)]
             Instruction::Dbg(_) => RawInstruction::Dbg,
@@ -121,6 +123,8 @@ pub enum RawInstruction {
     PopFrame,
     PushOnto,
     PopInto,
+    ThreadCreate,
+    ThreadJoin,
     Assert,
     #[cfg(debug_assertions)]
     Dbg,

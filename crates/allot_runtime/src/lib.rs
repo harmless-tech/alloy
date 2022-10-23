@@ -4,7 +4,7 @@ use std::sync::{Arc, RwLock};
 
 use allot_lib::{Instruction, Register, Type};
 
-use crate::memory::{CrossHeap, Heap, Registers, StackFrame};
+use crate::memory::{CrossHeap, Heap, HeapBox, Registers, StackFrame};
 
 mod library;
 mod memory;
@@ -12,7 +12,7 @@ mod operations;
 
 pub struct AllotRuntime {
     current: usize,
-    instructions: Vec<Instruction>,
+    instructions: Arc<Vec<Instruction>>,
     registers: Registers,
     stack_frames: Vec<StackFrame>,
     heap: CrossHeap,
@@ -20,6 +20,17 @@ pub struct AllotRuntime {
 }
 impl AllotRuntime {
     pub fn new(instructions: Vec<Instruction>) -> Self {
+        Self {
+            instructions: Arc::new(instructions),
+            registers: Registers::new(),
+            stack_frames: vec![StackFrame::default()],
+            heap: Arc::new(RwLock::new(Heap::default())),
+            current: 0,
+            is_thread: false,
+        }
+    }
+
+    pub fn new_arc(instructions: Arc<Vec<Instruction>>) -> Self {
         Self {
             instructions,
             registers: Registers::new(),
@@ -30,11 +41,20 @@ impl AllotRuntime {
         }
     }
 
-    pub fn new_thread(instructions: Vec<Instruction>) -> Self {
-        let mut s = AllotRuntime::new(instructions);
-        s.is_thread = true;
-
-        s
+    pub fn new_thread(
+        instructions: Arc<Vec<Instruction>>,
+        stack_frame: StackFrame,
+        heap: CrossHeap,
+        current: usize,
+    ) -> Self {
+        Self {
+            instructions,
+            registers: Registers::new(),
+            stack_frames: vec![stack_frame],
+            heap,
+            current,
+            is_thread: true,
+        }
     }
 
     pub fn tick(&mut self) -> Option<i32> {
@@ -98,9 +118,8 @@ impl AllotRuntime {
                     .stack_frames
                     .last_mut()
                     .expect("There was no stack frame to take.");
-                let heap = self.heap.clone();
 
-                let ret = library::call(function.as_str(), r9, stack_frame, heap);
+                let ret = library::call(function.as_str(), r9, stack_frame, &self.heap);
                 self.registers.insert(Register::R10, ret);
             }
             Instruction::Exit(t) => {
@@ -168,6 +187,47 @@ impl AllotRuntime {
             }
             Instruction::PushOnto(_) => panic!("Not impl yet!"),
             Instruction::PopInto => panic!("Not impl yet!"),
+            Instruction::ThreadCreate(t) => {
+                let address = AllotRuntime::get_address(t, &mut self.registers);
+                let sf = self.stack_frames.pop();
+                if sf.is_none() || self.stack_frames.is_empty() {
+                    panic!("Could not pop stack frame for thread.");
+                }
+                let sf = sf.unwrap();
+                let instructions = self.instructions.clone();
+                let heap = self.heap.clone();
+
+                let handle = std::thread::spawn(move || {
+                    let mut runtime = AllotRuntime::new_thread(instructions, sf, heap, address);
+                    (runtime.run(), runtime.take_stack_frame())
+                });
+
+                let i = {
+                    let mut heap = self.heap.write().unwrap();
+                    heap.push(HeapBox::ThreadHandle(Box::new(handle)))
+                };
+                self.registers.insert(Register::R0, i);
+            }
+            Instruction::ThreadJoin(reg) => {
+                let pointer = match self.registers.get(*reg) {
+                    Type::Pointer(p) => p,
+                    _ => panic!("ThreadJoin did not receive a pointer type."),
+                };
+
+                let handle = {
+                    let mut heap = self.heap.write().unwrap();
+                    heap.take(*pointer)
+                };
+
+                match handle {
+                    HeapBox::ThreadHandle(handle) => {
+                        let ret = handle.join().expect("Fatal error on thread join.");
+                        self.registers.insert(Register::R0, Type::Int32(ret.0));
+                        self.stack_frames.push(ret.1);
+                    }
+                    _ => panic!("ThreadJoin tried to get a ThreadHandle, but the pointer did not lead to one.")
+                }
+            }
             Instruction::Assert(reg, t) => {
                 use allot_lib::OpPrim2;
 
@@ -220,6 +280,10 @@ impl AllotRuntime {
         }
         code.unwrap()
     }
+
+    pub fn take_stack_frame(&mut self) -> StackFrame {
+        self.stack_frames.pop().expect("No stack frames to take.")
+    }
 }
 impl AllotRuntime {
     #[inline]
@@ -252,6 +316,18 @@ impl AllotRuntime {
             Type::Address(i) => *i,
             Type::Register(reg) => match registers.get(*reg) {
                 Type::Address(i) => *i,
+                _ => panic!("Register did not hold a Label type."),
+            },
+            _ => panic!("Type was not a Label or Register."),
+        }
+    }
+
+    #[inline]
+    fn get_pointer(t: &Type, registers: &mut Registers) -> usize {
+        match t {
+            Type::Pointer(i) => *i,
+            Type::Register(reg) => match registers.get(*reg) {
+                Type::Pointer(i) => *i,
                 _ => panic!("Register did not hold a Label type."),
             },
             _ => panic!("Type was not a Label or Register."),

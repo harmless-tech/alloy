@@ -9,8 +9,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-# TODO: Push to crates.io
-
 jobs:
   clippy-fmt:
     runs-on: ubuntu-latest

@@ -42,7 +42,9 @@ impl ByteForm for RawInstruction {
             RawInstruction::PopFrame => 16,
             RawInstruction::PushOnto => 17,
             RawInstruction::PopInto => 18,
-            RawInstruction::Assert => 19,
+            RawInstruction::ThreadCreate => 19,
+            RawInstruction::ThreadJoin => 20,
+            RawInstruction::Assert => 21,
             #[cfg(debug_assertions)]
             RawInstruction::Dbg => 128,
             #[cfg(debug_assertions)]
@@ -71,7 +73,9 @@ impl ByteForm for RawInstruction {
             16 => RawInstruction::PopFrame,
             17 => RawInstruction::PushOnto,
             18 => RawInstruction::PopInto,
-            19 => RawInstruction::Assert,
+            19 => RawInstruction::ThreadCreate,
+            20 => RawInstruction::ThreadJoin,
+            21 => RawInstruction::Assert,
             #[cfg(debug_assertions)]
             128 => RawInstruction::Dbg,
             #[cfg(debug_assertions)]
