@@ -1,6 +1,6 @@
 use crate::{Operation, RawType, Register, Type};
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub enum Instruction {
     /// Does nothing.
     Nop,

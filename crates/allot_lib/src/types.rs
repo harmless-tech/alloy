@@ -1,6 +1,6 @@
 use crate::Register;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub enum Type {
     None,
 
@@ -61,7 +61,7 @@ impl Type {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum RawType {
     None,
 

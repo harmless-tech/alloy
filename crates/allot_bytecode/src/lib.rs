@@ -1,3 +1,4 @@
+#[cfg(feature = "forms")]
 mod forms;
 #[cfg(feature = "gen")]
 mod gen;
@@ -6,6 +7,7 @@ mod parse;
 
 use std::mem::size_of;
 
+#[cfg(feature = "forms")]
 pub use forms::*;
 #[cfg(feature = "gen")]
 pub use gen::gen;
@@ -13,9 +15,8 @@ pub use gen::gen;
 pub use parse::parse;
 
 /// For now the layout of allot files the BYTECODE_VERSION, then just a linear list of instructions.
-
 // TODO: Allow some data about the program to be stored.
-#[allow(dead_code)] // TODO: Remove
+
 pub const BYTECODE_VERSION: usize = 0;
 
 #[derive(Clone, Debug, Default)]
@@ -27,6 +28,10 @@ impl Buffer {
 
     pub fn with(vec: Vec<u8>) -> Self {
         Self(vec)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 
     // Write

@@ -1,10 +1,10 @@
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Operation {
     Prim1(OpPrim1),
     Prim2(OpPrim2),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum OpPrim1 {
     /// ++
     Increment,
@@ -16,7 +16,7 @@ pub enum OpPrim1 {
     BitwiseNot,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum OpPrim2 {
     /// +
     Add,

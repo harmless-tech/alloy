@@ -24,7 +24,7 @@ mimalloc = { version = "0.1.30", default-features = false }
 
 [[test]]
 name = "tests"
-path = "tests/tests.rs"
+path = "tests/runtime.rs"
 
 [[bench]]
 name = "benchmarks"
