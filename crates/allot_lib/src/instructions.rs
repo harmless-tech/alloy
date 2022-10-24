@@ -1,5 +1,7 @@
 use crate::{Operation, RawType, Register, Type};
 
+// TODO: Get rid of debug only instructions? Or just make it so they do not run in release mode?
+
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub enum Instruction {
     /// Does nothing.
@@ -47,9 +49,9 @@ pub enum Instruction {
     /// Pops from the last stack frame and pushes it to the current one.
     /// May fail if the last stack frame is isolated.
     TakeFrom,
-    /// Pushes onto the last stack frame. If no register is listed, then it pops from the current stack frame.
+    /// Pops from the current stack frame and pushes onto the last stack frame.
     /// May fail if the current stack frame is isolated.
-    GiveTo(Option<Register>),
+    GiveTo,
 
     /// Takes the current stack frame (Errors if it is the root stack frame) and runs it on a new thread starting at the label.
     /// Threads have their own registers and stack frames, the heap is shared between all threads.
@@ -90,7 +92,7 @@ impl Instruction {
             Instruction::PushFrame(_) => RawInstruction::PushFrame,
             Instruction::PopFrame => RawInstruction::PopFrame,
             Instruction::TakeFrom => RawInstruction::TakeFrom,
-            Instruction::GiveTo(_) => RawInstruction::GiveTo,
+            Instruction::GiveTo => RawInstruction::GiveTo,
             Instruction::ThreadCreate(_) => RawInstruction::ThreadCreate,
             Instruction::ThreadJoin(_) => RawInstruction::ThreadJoin,
             Instruction::Assert(_, _) => RawInstruction::Assert,
@@ -102,7 +104,7 @@ impl Instruction {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum RawInstruction {
     Nop,
     Op,

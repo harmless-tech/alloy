@@ -56,6 +56,6 @@ pub enum OpPrim2 {
     ShiftLeft,
     /// >>
     ShiftRight,
-    /// == for type
+    /// <>
     SameType,
 }

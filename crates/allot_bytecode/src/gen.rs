@@ -56,10 +56,7 @@ pub fn gen(instructions: Vec<Instruction>) -> Vec<u8> {
             Instruction::PushFrame(v) => buffer.write_bool(v),
             Instruction::PopFrame => {}
             Instruction::TakeFrom => {}
-            Instruction::GiveTo(v) => match v {
-                None => write_register(&mut buffer, &Register::None),
-                Some(v) => write_register(&mut buffer, &v),
-            },
+            Instruction::GiveTo => {}
             Instruction::ThreadCreate(v) => write_type(&mut buffer, &v),
             Instruction::ThreadJoin(v) => write_register(&mut buffer, &v),
             Instruction::Assert(v1, v2) => {

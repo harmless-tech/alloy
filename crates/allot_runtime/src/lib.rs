@@ -186,7 +186,7 @@ impl AllotRuntime {
                 }
             }
             Instruction::TakeFrom => panic!("Not impl yet!"),
-            Instruction::GiveTo(_) => panic!("Not impl yet!"),
+            Instruction::GiveTo => panic!("Not impl yet!"),
             Instruction::ThreadCreate(t) => {
                 let address = AllotRuntime::get_address(t, &mut self.registers);
                 let sf = self.stack_frames.pop();
