@@ -69,7 +69,6 @@ fn functions() {
 }
 
 #[test]
-#[cfg(debug_assertions)]
 fn op_add() {
     let mut runtime = AllotRuntime::new(vec![
         Mov(R1, Type::UInt(50)),

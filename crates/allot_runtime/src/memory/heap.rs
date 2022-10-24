@@ -21,6 +21,7 @@ pub enum HeapBox {
     // Tuple?
     // HashSet
     // HashMap
+    // TODO: Allow for custom heap types.
 }
 
 #[derive(Debug, Default)]

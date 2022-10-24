@@ -8,6 +8,12 @@ readme = "README.md"
 homepage = "https://harmless.tech/languages/allot"
 repository = "https://github.com/harmless-tech/allot"
 license = "MIT"
+exclude = [
+    ".github/",
+    ".gitignore",
+    "justfile",
+    "rustfmt.toml",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

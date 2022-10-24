@@ -225,6 +225,7 @@ impl Parser {
                 },
                 _ => panic!("No token?"),
             },
+            #[cfg(debug_assertions)]
             _ => panic!("Unsupported instruction."),
         }
     }

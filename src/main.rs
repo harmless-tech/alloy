@@ -1,13 +1,13 @@
 mod args;
 
-use std::{fs, path::PathBuf};
+use std::fs;
 
 use allot_runtime::AllotRuntime;
 use anyhow::Result;
 use clap::Parser;
 use mimalloc::MiMalloc;
 
-/// File_Exts: asm: .ala, bytecode (program): .allot
+/// File Exts: asm: .ala, bytecode (program): .allot
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -23,7 +23,7 @@ fn main() -> Result<()> {
             let instructions = allot_asm::compile(file);
             let bytecode = allot_bytecode::gen(instructions);
 
-            let mut path: PathBuf = args.path;
+            let mut path: std::path::PathBuf = args.path;
             if path.set_extension("allot") {
                 fs::write(path, bytecode)?;
             }

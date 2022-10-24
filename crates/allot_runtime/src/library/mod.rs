@@ -30,7 +30,7 @@ static FUNCTIONS: phf::Map<&'static str, LibraryFunction> = phf_map! {
     // "error" => error,
 
     // String
-    // "string::to_u8"
+    // "string::convert"
     //TODO Allow RawTypes as type? Or just use a UInt to convert.
 };
 

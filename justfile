@@ -12,10 +12,17 @@ check:
     cargo +nightly fmt --check
     cargo clippy --all-targets --all-features --workspace -- -D warnings
 
+checkr:
+    cargo +nightly fmt --check
+    cargo clippy --all-targets --all-features --workspace --release -- -D warnings
+
 doc:
     cargo doc --workspace --all-features --document-private-items --open
 
 test:
+    cargo test --workspace --all-features
+
+testr:
     cargo test --workspace --all-features
 
 test-out:
@@ -33,14 +40,10 @@ build:
 buildr: check test
     cargo build --release --workspace
 
-publish-dry:
-    cargo publish --dry-run --allow-dirty -p allot_runtime
-    cargo package --list --allow-dirty -p allot_runtime
-    cargo publish --dry-run --allow-dirty -p allot
-    cargo package --list --allow-dirty -p allot
+pkg PACKAGE:
+    #cargo publish --dry-run --allow-dirty --no-verify -p {{PACKAGE}}
+    cargo package --list --allow-dirty --no-verify -p {{PACKAGE}}
 
-run:
-    cargo run
-
-runr:
-    cargo run --release
+run-t1:
+    cargo run --release -- ./asm.tmp --asm
+    cargo run --release -- ./asm.allot

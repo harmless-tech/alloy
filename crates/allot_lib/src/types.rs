@@ -30,8 +30,6 @@ pub enum Type {
     Address(usize),
     Pointer(usize),
     Register(Register),
-    //TODO: Handle this with library function.
-    // Thread(Rc<std::thread::JoinHandle<(Option<i32>, StackFrame)>>), // Exit, StackFrame
 }
 impl Type {
     pub fn to_raw(&self) -> RawType {
