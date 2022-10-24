@@ -16,11 +16,16 @@ name = "allot"
 path = "src/main.rs"
 
 [dependencies]
-allot_bytecode = { version = "0.0.1-alpha", path = "crates/allot_bytecode" }
-allot_lib = { version = "0.0.1-alpha", path = "crates/allot_lib" } # TODO: Needed?
+allot_asm = { version = "0.0.1-alpha", path = "crates/allot_asm", optional = true }
+allot_bytecode = { version = "0.0.1-alpha", path = "crates/allot_bytecode", default-features = false, features = ["parse"]}
 allot_runtime = { version = "0.0.1-alpha", path = "crates/allot_runtime" }
+anyhow = "1.0.66"
 clap = { version = "4.0.18", features = ["derive"] }
 mimalloc = { version = "0.1.30", default-features = false }
+
+[features]
+default = ["asm"]
+asm = ["allot_asm", "allot_bytecode/gen"]
 
 [workspace]
 members = ["crates/*"]

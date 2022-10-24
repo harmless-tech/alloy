@@ -3,14 +3,14 @@ use allot_lib::Type;
 #[derive(Debug, Default)]
 pub struct StackFrame {
     stack: Vec<Type>,
-    /// Cannot access this stack frame from another one.
-    isolated: bool,
+    // Cannot access this stack frame from another one.
+    // isolated: bool, TODO: Enable this when transferring between stack frames is possible.
 }
 impl StackFrame {
-    pub fn new(isolated: bool) -> Self {
+    pub fn new(_isolated: bool) -> Self {
         Self {
             stack: Vec::new(),
-            isolated,
+            // isolated,
         }
     }
 
@@ -21,7 +21,7 @@ impl StackFrame {
             .collect();
         Self {
             stack,
-            isolated: false,
+            // isolated: false,
         }
     }
 

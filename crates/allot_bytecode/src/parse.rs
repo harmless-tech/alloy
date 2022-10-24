@@ -58,15 +58,15 @@ fn read_instruction(buffer: &mut Buffer) -> Instruction {
         RawInstruction::StackCpy => Instruction::StackCpy(read_register(buffer), read_type(buffer)),
         RawInstruction::PushFrame => Instruction::PushFrame(buffer.read_bool()),
         RawInstruction::PopFrame => Instruction::PopFrame,
-        RawInstruction::PushOnto => {
+        RawInstruction::TakeFrom => Instruction::TakeFrom,
+        RawInstruction::GiveTo => {
             let reg = read_register(buffer);
             let reg = match reg {
                 Register::None => None,
                 _ => Some(reg),
             };
-            Instruction::PushOnto(reg)
+            Instruction::GiveTo(reg)
         }
-        RawInstruction::PopInto => Instruction::PopInto,
         RawInstruction::ThreadCreate => Instruction::ThreadCreate(read_type(buffer)),
         RawInstruction::ThreadJoin => Instruction::ThreadJoin(read_register(buffer)),
         RawInstruction::Assert => Instruction::Assert(read_register(buffer), read_type(buffer)),

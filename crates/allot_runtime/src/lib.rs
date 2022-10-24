@@ -1,5 +1,3 @@
-#![allow(dead_code)] // TODO: Remove?
-
 use std::sync::{Arc, RwLock};
 
 use allot_lib::{Instruction, Register, Type};
@@ -18,7 +16,6 @@ pub struct AllotRuntime {
     registers: Registers,
     stack_frames: Vec<StackFrame>,
     heap: CrossHeap,
-    is_thread: bool,
 }
 impl AllotRuntime {
     pub fn new(instructions: Vec<Instruction>) -> Self {
@@ -28,7 +25,6 @@ impl AllotRuntime {
             stack_frames: vec![StackFrame::default()],
             heap: Arc::new(RwLock::new(Heap::default())),
             current: 0,
-            is_thread: false,
         }
     }
 
@@ -39,7 +35,6 @@ impl AllotRuntime {
             stack_frames: vec![StackFrame::default()],
             heap: Arc::new(RwLock::new(Heap::default())),
             current: 0,
-            is_thread: false,
         }
     }
 
@@ -55,7 +50,6 @@ impl AllotRuntime {
             stack_frames: vec![stack_frame],
             heap,
             current,
-            is_thread: true,
         }
     }
 
@@ -191,8 +185,8 @@ impl AllotRuntime {
                     panic!("Could not pop stack frame.");
                 }
             }
-            Instruction::PushOnto(_) => panic!("Not impl yet!"),
-            Instruction::PopInto => panic!("Not impl yet!"),
+            Instruction::TakeFrom => panic!("Not impl yet!"),
+            Instruction::GiveTo(_) => panic!("Not impl yet!"),
             Instruction::ThreadCreate(t) => {
                 let address = AllotRuntime::get_address(t, &mut self.registers);
                 let sf = self.stack_frames.pop();
@@ -322,18 +316,6 @@ impl AllotRuntime {
             Type::Address(i) => *i,
             Type::Register(reg) => match registers.get(*reg) {
                 Type::Address(i) => *i,
-                _ => panic!("Register did not hold a Label type."),
-            },
-            _ => panic!("Type was not a Label or Register."),
-        }
-    }
-
-    #[inline]
-    fn get_pointer(t: &Type, registers: &mut Registers) -> usize {
-        match t {
-            Type::Pointer(i) => *i,
-            Type::Register(reg) => match registers.get(*reg) {
-                Type::Pointer(i) => *i,
                 _ => panic!("Register did not hold a Label type."),
             },
             _ => panic!("Type was not a Label or Register."),

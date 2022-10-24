@@ -44,12 +44,12 @@ pub enum Instruction {
     PushFrame(bool),
     /// Pops the top stack frame. Errors if it is the root stack frame.
     PopFrame,
-    /// Pushes onto the last stack frame. If no register is listed, then it pops from the current stack frame.
-    /// May fail if the current stack frame is isolated.
-    PushOnto(Option<Register>),
     /// Pops from the last stack frame and pushes it to the current one.
     /// May fail if the last stack frame is isolated.
-    PopInto,
+    TakeFrom,
+    /// Pushes onto the last stack frame. If no register is listed, then it pops from the current stack frame.
+    /// May fail if the current stack frame is isolated.
+    GiveTo(Option<Register>),
 
     /// Takes the current stack frame (Errors if it is the root stack frame) and runs it on a new thread starting at the label.
     /// Threads have their own registers and stack frames, the heap is shared between all threads.
@@ -89,8 +89,8 @@ impl Instruction {
             Instruction::StackCpy(_, _) => RawInstruction::StackCpy,
             Instruction::PushFrame(_) => RawInstruction::PushFrame,
             Instruction::PopFrame => RawInstruction::PopFrame,
-            Instruction::PushOnto(_) => RawInstruction::PushOnto,
-            Instruction::PopInto => RawInstruction::PopInto,
+            Instruction::TakeFrom => RawInstruction::TakeFrom,
+            Instruction::GiveTo(_) => RawInstruction::GiveTo,
             Instruction::ThreadCreate(_) => RawInstruction::ThreadCreate,
             Instruction::ThreadJoin(_) => RawInstruction::ThreadJoin,
             Instruction::Assert(_, _) => RawInstruction::Assert,
@@ -121,8 +121,8 @@ pub enum RawInstruction {
     StackCpy,
     PushFrame,
     PopFrame,
-    PushOnto,
-    PopInto,
+    TakeFrom,
+    GiveTo,
     ThreadCreate,
     ThreadJoin,
     Assert,
