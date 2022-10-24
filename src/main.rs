@@ -24,7 +24,7 @@ fn main() -> Result<()> {
             let bytecode = allot_bytecode::gen(instructions);
 
             let mut path: PathBuf = args.path;
-            if path.set_extension(".allot") {
+            if path.set_extension("allot") {
                 fs::write(path, bytecode)?;
             }
             else {

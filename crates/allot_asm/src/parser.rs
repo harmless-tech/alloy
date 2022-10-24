@@ -24,11 +24,13 @@ pub fn parse(tokens: Vec<Token>) -> Vec<Instruction> {
 
 impl Parser {
     fn parse(&mut self) {
-        let t = self.tokens.pop().expect("No token?");
+        while !self.tokens.is_empty() {
+            let t = self.tokens.pop().expect("No token?");
 
-        match t {
-            Token::Instruction(i) => self.parse_instruction(i),
-            _ => panic!("Parse Error: Expected instruction."),
+            match t {
+                Token::Instruction(i) => self.parse_instruction(i),
+                _ => panic!("Parse Error: Expected instruction."),
+            }
         }
     }
 
@@ -86,7 +88,23 @@ impl Parser {
                 },
                 _ => panic!("No token?"),
             },
-            RawInstruction::Jmp => {}
+            RawInstruction::Jmp => match (self.tokens.pop(), self.tokens.pop()) {
+                (Some(t1), Some(t2)) => match (t1, t2) {
+                    (Token::Register(r), Token::Type(t)) => {
+                        let r = Register::cast(r);
+                        let r = match r {
+                            Register::None => None,
+                            _ => Some(r),
+                        };
+                        self.instructions.push(Instruction::Jmp(
+                            r,
+                            Parser::parse_type(t, self.tokens.pop().unwrap()),
+                        ))
+                    }
+                    _ => panic!("Parse Error: Unexpected token."),
+                },
+                _ => panic!("No token?"),
+            },
             RawInstruction::Ret => self.instructions.push(Instruction::Ret),
             RawInstruction::Call => match self.tokens.pop() {
                 None => panic!("No token?"),
@@ -104,10 +122,51 @@ impl Parser {
                     _ => panic!("Parse Error: Expected type."),
                 },
             },
-            RawInstruction::Push => {}
-            RawInstruction::PushCpy => {}
-            RawInstruction::Pop => {}
-            RawInstruction::PopMany => {}
+            RawInstruction::Push => match self.tokens.pop() {
+                None => panic!("No token?"),
+                Some(t) => match t {
+                    Token::Register(r) => {
+                        self.instructions.push(Instruction::Push(Register::cast(r)))
+                    }
+                    _ => panic!("Parse Error: Expected register."),
+                },
+            },
+            RawInstruction::PushCpy => match self.tokens.pop() {
+                None => panic!("No token?"),
+                Some(t) => match t {
+                    Token::Register(r) => self
+                        .instructions
+                        .push(Instruction::PushCpy(Register::cast(r))),
+                    _ => panic!("Parse Error: Expected register."),
+                },
+            },
+            RawInstruction::Pop => match self.tokens.pop() {
+                None => panic!("No token?"),
+                Some(t) => match t {
+                    Token::Register(r) => {
+                        let r = Register::cast(r);
+                        let r = match r {
+                            Register::None => None,
+                            _ => Some(r),
+                        };
+                        self.instructions.push(Instruction::Pop(r))
+                    }
+                    _ => panic!("Parse Error: Expected register."),
+                },
+            },
+            RawInstruction::PopMany => match self.tokens.pop() {
+                None => panic!("No token?"),
+                Some(t) => match t {
+                    Token::Type(t) => {
+                        self.instructions
+                            .push(Instruction::PopMany(Parser::parse_type(
+                                t,
+                                self.tokens.pop().unwrap(),
+                            )))
+                    }
+                    _ => panic!("Parse Error: Expected type."),
+                },
+            },
             RawInstruction::StackCpy => match (self.tokens.pop(), self.tokens.pop()) {
                 (Some(t1), Some(t2)) => match (t1, t2) {
                     (Token::Register(r), Token::Type(t)) => {
@@ -132,8 +191,28 @@ impl Parser {
             RawInstruction::PopFrame => self.instructions.push(Instruction::PopFrame),
             RawInstruction::TakeFrom => self.instructions.push(Instruction::TakeFrom),
             RawInstruction::GiveTo => self.instructions.push(Instruction::GiveTo),
-            RawInstruction::ThreadCreate => {}
-            RawInstruction::ThreadJoin => {}
+            RawInstruction::ThreadCreate => {
+                match self.tokens.pop() {
+                    None => panic!("No token?"),
+                    Some(t) => {
+                        match t {
+                            Token::Type(t) => self.instructions.push(Instruction::ThreadCreate(
+                                Parser::parse_type(t, self.tokens.pop().unwrap()),
+                            )),
+                            _ => panic!("Parse Error: Expected type."),
+                        }
+                    }
+                }
+            }
+            RawInstruction::ThreadJoin => match self.tokens.pop() {
+                None => panic!("No token?"),
+                Some(t) => match t {
+                    Token::Register(r) => self
+                        .instructions
+                        .push(Instruction::ThreadJoin(Register::cast(r))),
+                    _ => panic!("Parse Error: Expected register."),
+                },
+            },
             RawInstruction::Assert => match (self.tokens.pop(), self.tokens.pop()) {
                 (Some(t1), Some(t2)) => match (t1, t2) {
                     (Token::Register(r), Token::Type(t)) => {

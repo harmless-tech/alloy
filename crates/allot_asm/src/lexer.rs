@@ -282,7 +282,6 @@ pub fn lex(program: &str) -> Vec<Token> {
             }
             // Register Matching
             else if let Some((_, num)) = regex_captures!("^r([\\d]+)\\s", s) {
-                dbg!(num);
                 token_list.push(Token::Register(num.parse::<u8>().unwrap()));
                 index += 1 + num.len();
             }
@@ -293,7 +292,7 @@ pub fn lex(program: &str) -> Vec<Token> {
                 index += ri + 1;
             }
             // Ignore Comments
-            else if regex!("^;\\s").is_match(s) {
+            else if regex!("^;").is_match(s) {
                 break;
             }
             else {

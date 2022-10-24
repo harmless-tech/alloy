@@ -22,7 +22,7 @@ pub enum Instruction {
     /// Loads an address value into the register. (Could be simulated by using Mov)
     Lea(Register, usize),
     /// Jumps to a label, depending on the value in the register.
-    Jmp(Option<Register>, Type), // Type = Label || Register
+    Jmp(Option<Register>, Type), // Type = Address || Register
     /// Pops the stack and jumps to that label.
     Ret,
 
