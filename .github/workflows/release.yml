@@ -301,13 +301,13 @@ jobs:
       - name: Publish
         run: |
           cargo publish --token ${CRATES_TOKEN} -p allot_lib
-          sleep 10
+          sleep 30
           cargo publish --token ${CRATES_TOKEN} -p allot_asm
-          sleep 10
+          sleep 30
           cargo publish --token ${CRATES_TOKEN} -p allot_bytecode
-          sleep 10
+          sleep 30
           cargo publish --token ${CRATES_TOKEN} -p allot_runtime
-          sleep 10
+          sleep 30
           cargo publish --token ${CRATES_TOKEN} -p allot
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}

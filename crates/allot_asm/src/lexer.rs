@@ -16,6 +16,9 @@ pub fn lex(program: &str) -> Vec<Token> {
     let lines = program.split('\n');
     for line in lines {
         let line = line.trim();
+        let mut line = String::from(line);
+        line.push(' ');
+        let line = line.as_str();
 
         let mut index = 0_usize;
         while index < line.len() {
@@ -279,6 +282,14 @@ pub fn lex(program: &str) -> Vec<Token> {
             else if regex!("^bool").is_match(s) {
                 token_list.push(Token::Type(RawType::Boolean));
                 index += 4;
+            }
+            else if regex!("^add").is_match(s) {
+                token_list.push(Token::Type(RawType::Address));
+                index += 1;
+            }
+            else if regex!("^reg").is_match(s) {
+                token_list.push(Token::Type(RawType::Register));
+                index += 1;
             }
             // Register Matching
             else if let Some((_, num)) = regex_captures!("^r([\\d]+)\\s", s) {

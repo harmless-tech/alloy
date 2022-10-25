@@ -2,6 +2,13 @@ use allot_lib::{Instruction, RawInstruction, RawType, Register, Type};
 
 use crate::lexer::Token;
 
+pub fn parse(tokens: Vec<Token>) -> Vec<Instruction> {
+    let mut p = Parser::new(tokens);
+    p.parse();
+
+    p.instructions
+}
+
 struct Parser {
     tokens: Vec<Token>,
     instructions: Vec<Instruction>,
@@ -13,16 +20,7 @@ impl Parser {
             instructions: Vec::new(),
         }
     }
-}
 
-pub fn parse(tokens: Vec<Token>) -> Vec<Instruction> {
-    let mut p = Parser::new(tokens);
-    p.parse();
-
-    p.instructions
-}
-
-impl Parser {
     fn parse(&mut self) {
         while !self.tokens.is_empty() {
             let t = self.tokens.pop().expect("No token?");
@@ -250,6 +248,10 @@ impl Parser {
             (RawType::Char, Token::Data(d)) => Type::Char(d.parse::<char>().unwrap()),
             (RawType::String, Token::Data(d)) => Type::String(d),
             (RawType::Boolean, Token::Data(d)) => Type::Boolean(d.parse::<bool>().unwrap()),
+            (RawType::Address, Token::Data(d)) => Type::Address(d.parse::<usize>().unwrap()),
+            (RawType::Register, Token::Data(d)) => {
+                Type::Register(Register::cast(d.parse::<u8>().unwrap()))
+            }
             _ => panic!("Parser Error: Unsupported type or next token was not a data token."),
         }
     }

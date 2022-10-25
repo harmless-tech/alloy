@@ -44,6 +44,6 @@ pkg PACKAGE:
     #cargo publish --dry-run --allow-dirty --no-verify -p {{PACKAGE}}
     cargo package --list --allow-dirty --no-verify -p {{PACKAGE}}
 
-run-t1:
-    cargo run --release -- ./asm.tmp --asm
-    cargo run --release -- ./asm.allot
+prg NAME:
+    cargo run --release -- --asm ./crates/allot_asm/programs/{{NAME}}.ala
+    cargo run --release -- ./crates/allot_asm/programs/{{NAME}}.allot

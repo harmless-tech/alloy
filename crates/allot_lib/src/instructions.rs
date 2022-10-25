@@ -1,6 +1,6 @@
 use crate::{Operation, RawType, Register, Type};
 
-// TODO: Get rid of debug only instructions? Or just make it so they do not run in release mode?
+// TODO: Should Instruction impl num_enum or just RawInstruction.
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub enum Instruction {
@@ -64,6 +64,7 @@ pub enum Instruction {
     /// Asserts that a register is equal to a type. Should only be used in debug builds of your allot program.
     Assert(Register, Type),
 
+    // TODO: These should be allowed in release builds, but they will only do things in debug builds.
     #[cfg(debug_assertions)]
     /// Prints a register. (Debug builds only)
     Dbg(Register),

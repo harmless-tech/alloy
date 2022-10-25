@@ -1,5 +1,6 @@
 use allot_lib::{OpPrim1, OpPrim2, Operation, RawInstruction, RawType, Register};
 
+#[deprecated(note = "Will switch over to num_enum crate.")]
 pub trait ByteForm {
     fn to_byte(&self) -> u8;
     fn from_byte(byte: u8) -> Self; // TODO: Result type instead of panic?

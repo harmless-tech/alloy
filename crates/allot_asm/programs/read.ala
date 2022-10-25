@@ -1,0 +1,15 @@
+;; read - harmless-tech
+;; Reads in bytes and adds them up, until it gets a '\n'.
+mov r20 usize(0)
+
+call (read)
+mov r0 u8(10)
+op == r0 r10
+jmp r0 add(8)
+cast r10 usize
+op + r20 r10
+jmp r255 add(1)
+
+cpy r9 r20
+call (println)
+exit i32(0)

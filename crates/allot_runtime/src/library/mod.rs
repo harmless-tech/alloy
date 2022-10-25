@@ -5,7 +5,7 @@ mod thread;
 
 use std::{
     io,
-    io::{BufRead, Read},
+    io::{BufRead, Read, Write},
 };
 
 use phf::phf_map;
@@ -30,6 +30,7 @@ static FUNCTIONS: phf::Map<&'static str, LibraryFunction> = phf_map! {
     // "error" => error,
 
     // String
+    "string::trim" => impl_string_trim // TODO: Move to own module?
     // "string::convert"
     //TODO Allow RawTypes as type? Or just use a UInt to convert.
 };
@@ -44,7 +45,7 @@ pub fn call(function: &str, arg: Type, stack_frame: &mut StackFrame, heap: &Cros
 }
 
 // Library functions
-//fn template(arg: Type, stack_frame: &mut StackFrame, heap: CrossHeap) -> Type {}
+//fn template(arg: Type, stack_frame: &mut StackFrame, heap: &CrossHeap) -> Type {}
 
 fn print(arg: Type, _stack_frame: &mut StackFrame, _heap: &CrossHeap) -> Type {
     match arg {
@@ -70,6 +71,9 @@ fn print(arg: Type, _stack_frame: &mut StackFrame, _heap: &CrossHeap) -> Type {
         Type::Address(v) => print!("{:X?}", v),
         Type::Register(v) => print!("{:?}", v),
     }
+
+    io::stdout().flush().unwrap();
+
     Type::None
 }
 
@@ -127,4 +131,11 @@ fn read_line(_arg: Type, _stack_frame: &mut StackFrame, _heap: &CrossHeap) -> Ty
         .expect("Failed to read line from stdin.");
 
     Type::String(buffer)
+}
+
+fn impl_string_trim(arg: Type, _stack_frame: &mut StackFrame, _heap: &CrossHeap) -> Type {
+    match arg {
+        Type::String(v) => Type::String(String::from(v.trim())),
+        _ => panic!("string::trim expects a string in register 9."),
+    }
 }

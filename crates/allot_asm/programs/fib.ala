@@ -1,0 +1,15 @@
+;; fib - harmless-tech
+;; Computes the numbers of the fib sequence up to the 150th fibonacci number.
+mov r0 usize(150) ; Counter
+mov r9 u128(0)
+mov r8 u128(1)
+nop               ; Loop part
+call (println)
+cpy r5 r9
+op + r9 r8
+cpy r8 r5
+mov r21 usize(0)
+op -- r0 r255
+op != r21 r0
+jmp r21 add(4) ; Can load address directly into a Jmp instruction.
+exit i32(0)

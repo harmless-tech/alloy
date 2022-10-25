@@ -2,6 +2,7 @@ use allot_lib::{OpPrim1, OpPrim2, Operation, RawType, Register, Type};
 
 use crate::memory::Registers;
 
+// TODO: Should casting be allowed for NUMBER->String or should that be a library function?
 pub fn cast(t: &Type, raw: RawType) -> Type {
     match t {
         Type::Int8(v) => match raw {

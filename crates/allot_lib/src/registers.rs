@@ -35,6 +35,7 @@ pub enum Register {
     None = 255,
 }
 impl Register {
+    #[deprecated(note = "Will switch over to num_enum crate.")]
     pub fn cast(byte: u8) -> Self {
         match byte {
             0 => Register::R0,

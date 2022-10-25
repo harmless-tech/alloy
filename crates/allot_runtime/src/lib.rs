@@ -8,7 +8,8 @@ mod library;
 mod memory;
 mod operations;
 
-// TODO: This should reexport allot_lib stuff.
+#[doc(hidden)]
+pub use allot_lib::*;
 
 pub struct AllotRuntime {
     current: usize,
@@ -229,9 +230,7 @@ impl AllotRuntime {
                 }
             }
             Instruction::Assert(reg, t) => {
-                use allot_lib::OpPrim2;
-
-                // TODO: This is a kinda icky way to do this.
+                // TODO: This is a kinda icky way to do this. Maybe check type first, then do Equal?
                 let val = self.registers.clone(*reg);
                 let result = operations::solve_2(&OpPrim2::Equal, val, t.clone());
                 if let Type::Boolean(b) = result {

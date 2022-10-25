@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "allot"
-version = "0.0.1-alpha"
+version = "0.0.2-alpha"
 dependencies = [
  "allot_asm",
  "allot_bytecode",
@@ -25,7 +25,7 @@ dependencies = [
 
 [[package]]
 name = "allot_asm"
-version = "0.0.1-alpha"
+version = "0.0.2-alpha"
 dependencies = [
  "allot_lib",
  "lazy-regex",
@@ -33,7 +33,7 @@ dependencies = [
 
 [[package]]
 name = "allot_bytecode"
-version = "0.0.1-alpha"
+version = "0.0.2-alpha"
 dependencies = [
  "allot_lib",
  "mimalloc",
@@ -41,11 +41,11 @@ dependencies = [
 
 [[package]]
 name = "allot_lib"
-version = "0.0.1-alpha"
+version = "0.0.2-alpha"
 
 [[package]]
 name = "allot_runtime"
-version = "0.0.1-alpha"
+version = "0.0.2-alpha"
 dependencies = [
  "allot_lib",
  "criterion",
@@ -141,9 +141,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.22"
+version = "3.2.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86447ad904c7fb335a790c9d7fe3d0d971dc523b8ccd1561a520de9a85302750"
+checksum = "71655c45cb9845d3270c9d6df84ebe72b4dad3c2ba3f7023ad47c144e4e473a5"
 dependencies = [
  "bitflags",
  "clap_lex 0.2.4",
@@ -207,7 +207,7 @@ dependencies = [
  "atty",
  "cast",
  "ciborium",
- "clap 3.2.22",
+ "clap 3.2.23",
  "criterion-plot",
  "itertools",
  "lazy_static",
@@ -374,9 +374,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.135"
+version = "0.2.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68783febc7782c6c5cb401fbda4de5a9898be1762314da0bb2c10ced61f18b0c"
+checksum = "55edcf6c0bb319052dea84732cf99db461780fd5e8d3eb46ab6ff312ab31f197"
 
 [[package]]
 name = "libmimalloc-sys"
@@ -711,9 +711,9 @@ dependencies = [
 
 [[package]]
 name = "textwrap"
-version = "0.15.1"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "949517c0cf1bf4ee812e2e07e08ab448e3ae0d23472aee8a06c985f0c8815b16"
+checksum = "222a222a5bfe1bba4a77b45ec488a741b3cb8872e5e499451fd7d0129c9c7c3d"
 
 [[package]]
 name = "tinytemplate"
