@@ -1,5 +1,3 @@
-#[cfg(feature = "forms")]
-mod forms;
 #[cfg(feature = "gen")]
 mod gen;
 #[cfg(feature = "parse")]

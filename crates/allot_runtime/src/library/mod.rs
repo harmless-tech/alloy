@@ -23,6 +23,9 @@ static FUNCTIONS: phf::Map<&'static str, LibraryFunction> = phf_map! {
     "read_line" => read_line,
     "std::read_all" => standard::read_all,
 
+    // Heap
+    "heap::free" => impl_heap_free,
+
     // Threads
     "thread::sleep" => thread::sleep,
 
@@ -131,6 +134,18 @@ fn read_line(_arg: Type, _stack_frame: &mut StackFrame, _heap: &CrossHeap) -> Ty
         .expect("Failed to read line from stdin.");
 
     Type::String(buffer)
+}
+
+fn impl_heap_free(arg: Type, _stack_frame: &mut StackFrame, heap: &CrossHeap) -> Type {
+    match arg {
+        Type::Pointer(p) => {
+            let mut handle = heap.write().unwrap();
+            handle.free(p);
+        }
+        _ => panic!("heap::free expects a pointer."),
+    }
+
+    Type::None
 }
 
 fn impl_string_trim(arg: Type, _stack_frame: &mut StackFrame, _heap: &CrossHeap) -> Type {

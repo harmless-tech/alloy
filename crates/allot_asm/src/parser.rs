@@ -40,7 +40,10 @@ impl Parser {
                     (Token::Operation(op), Token::Register(r1), Token::Register(r2)) => {
                         self.instructions.push(Instruction::Op(
                             op,
-                            [Register::cast(r1), Register::cast(r2)],
+                            [
+                                Register::try_from(r1).unwrap(),
+                                Register::try_from(r2).unwrap(),
+                            ],
                         ))
                     }
                     _ => panic!("Parse Error: Unexpected token."),
@@ -51,7 +54,7 @@ impl Parser {
                 (Some(t1), Some(t2)) => match (t1, t2) {
                     (Token::Register(r), Token::Type(t)) => {
                         self.instructions.push(Instruction::Mov(
-                            Register::cast(r),
+                            Register::try_from(r).unwrap(),
                             Parser::parse_type(t, self.tokens.pop().unwrap()),
                         ))
                     }
@@ -61,9 +64,12 @@ impl Parser {
             },
             RawInstruction::Cpy => match (self.tokens.pop(), self.tokens.pop()) {
                 (Some(t1), Some(t2)) => match (t1, t2) {
-                    (Token::Register(r1), Token::Register(r2)) => self
-                        .instructions
-                        .push(Instruction::Cpy(Register::cast(r1), Register::cast(r2))),
+                    (Token::Register(r1), Token::Register(r2)) => {
+                        self.instructions.push(Instruction::Cpy(
+                            Register::try_from(r1).unwrap(),
+                            Register::try_from(r2).unwrap(),
+                        ))
+                    }
                     _ => panic!("Parse Error: Unexpected token."),
                 },
                 _ => panic!("No token?"),
@@ -72,16 +78,19 @@ impl Parser {
                 (Some(t1), Some(t2)) => match (t1, t2) {
                     (Token::Register(r), Token::Type(t)) => self
                         .instructions
-                        .push(Instruction::Cast(Register::cast(r), t)),
+                        .push(Instruction::Cast(Register::try_from(r).unwrap(), t)),
                     _ => panic!("Parse Error: Unexpected token."),
                 },
                 _ => panic!("No token?"),
             },
             RawInstruction::Lea => match (self.tokens.pop(), self.tokens.pop()) {
                 (Some(t1), Some(t2)) => match (t1, t2) {
-                    (Token::Register(r), Token::Data(d)) => self.instructions.push(
-                        Instruction::Lea(Register::cast(r), d.parse::<usize>().unwrap()),
-                    ),
+                    (Token::Register(r), Token::Data(d)) => {
+                        self.instructions.push(Instruction::Lea(
+                            Register::try_from(r).unwrap(),
+                            d.parse::<usize>().unwrap(),
+                        ))
+                    }
                     _ => panic!("Parse Error: Expected data."),
                 },
                 _ => panic!("No token?"),
@@ -89,7 +98,7 @@ impl Parser {
             RawInstruction::Jmp => match (self.tokens.pop(), self.tokens.pop()) {
                 (Some(t1), Some(t2)) => match (t1, t2) {
                     (Token::Register(r), Token::Type(t)) => {
-                        let r = Register::cast(r);
+                        let r = Register::try_from(r).unwrap();
                         let r = match r {
                             Register::None => None,
                             _ => Some(r),
@@ -123,9 +132,9 @@ impl Parser {
             RawInstruction::Push => match self.tokens.pop() {
                 None => panic!("No token?"),
                 Some(t) => match t {
-                    Token::Register(r) => {
-                        self.instructions.push(Instruction::Push(Register::cast(r)))
-                    }
+                    Token::Register(r) => self
+                        .instructions
+                        .push(Instruction::Push(Register::try_from(r).unwrap())),
                     _ => panic!("Parse Error: Expected register."),
                 },
             },
@@ -134,7 +143,7 @@ impl Parser {
                 Some(t) => match t {
                     Token::Register(r) => self
                         .instructions
-                        .push(Instruction::PushCpy(Register::cast(r))),
+                        .push(Instruction::PushCpy(Register::try_from(r).unwrap())),
                     _ => panic!("Parse Error: Expected register."),
                 },
             },
@@ -142,7 +151,7 @@ impl Parser {
                 None => panic!("No token?"),
                 Some(t) => match t {
                     Token::Register(r) => {
-                        let r = Register::cast(r);
+                        let r = Register::try_from(r).unwrap();
                         let r = match r {
                             Register::None => None,
                             _ => Some(r),
@@ -169,7 +178,7 @@ impl Parser {
                 (Some(t1), Some(t2)) => match (t1, t2) {
                     (Token::Register(r), Token::Type(t)) => {
                         self.instructions.push(Instruction::StackCpy(
-                            Register::cast(r),
+                            Register::try_from(r).unwrap(),
                             Parser::parse_type(t, self.tokens.pop().unwrap()),
                         ))
                     }
@@ -207,7 +216,7 @@ impl Parser {
                 Some(t) => match t {
                     Token::Register(r) => self
                         .instructions
-                        .push(Instruction::ThreadJoin(Register::cast(r))),
+                        .push(Instruction::ThreadJoin(Register::try_from(r).unwrap())),
                     _ => panic!("Parse Error: Expected register."),
                 },
             },
@@ -215,7 +224,7 @@ impl Parser {
                 (Some(t1), Some(t2)) => match (t1, t2) {
                     (Token::Register(r), Token::Type(t)) => {
                         self.instructions.push(Instruction::Assert(
-                            Register::cast(r),
+                            Register::try_from(r).unwrap(),
                             Parser::parse_type(t, self.tokens.pop().unwrap()),
                         ))
                     }
@@ -223,8 +232,12 @@ impl Parser {
                 },
                 _ => panic!("No token?"),
             },
-            #[cfg(debug_assertions)]
-            _ => panic!("Unsupported instruction."),
+            RawInstruction::Dbg => {
+                todo!()
+            }
+            RawInstruction::Dump => {
+                todo!()
+            }
         }
     }
 
@@ -250,7 +263,7 @@ impl Parser {
             (RawType::Boolean, Token::Data(d)) => Type::Boolean(d.parse::<bool>().unwrap()),
             (RawType::Address, Token::Data(d)) => Type::Address(d.parse::<usize>().unwrap()),
             (RawType::Register, Token::Data(d)) => {
-                Type::Register(Register::cast(d.parse::<u8>().unwrap()))
+                Type::Register(Register::try_from(d.parse::<u8>().unwrap()).unwrap())
             }
             _ => panic!("Parser Error: Unsupported type or next token was not a data token."),
         }

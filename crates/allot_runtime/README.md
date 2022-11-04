@@ -7,3 +7,4 @@ Currently, a heavy work in-progress. Check back later for documentation and a be
 - Wasm plugins. (Instruction::Extern(module, function))
 - All panics should become Result<_, Error>.
 - Safety checks? (Enforced with outside checks?)
+- Change how the heap works?

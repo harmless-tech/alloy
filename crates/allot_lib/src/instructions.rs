@@ -1,3 +1,5 @@
+use num_enum::{IntoPrimitive, TryFromPrimitive};
+
 use crate::{Operation, RawType, Register, Type};
 
 // TODO: Should Instruction impl num_enum or just RawInstruction.
@@ -9,6 +11,8 @@ pub enum Instruction {
 
     /// Does an operation on register(s).
     Op(Operation, [Register; 2]),
+    /// Checks if a register is a type.
+    // IsType(Register, RawType),
 
     /// Moves the value in the second register to the first register.
     Mov(Register, Type),
@@ -64,11 +68,8 @@ pub enum Instruction {
     /// Asserts that a register is equal to a type. Should only be used in debug builds of your allot program.
     Assert(Register, Type),
 
-    // TODO: These should be allowed in release builds, but they will only do things in debug builds.
-    #[cfg(debug_assertions)]
     /// Prints a register. (Debug builds only)
     Dbg(Register),
-    #[cfg(debug_assertions)]
     /// Prints all registers, stack frames, and the heap. (Debug builds only)
     Dump(u8),
 }
@@ -97,15 +98,14 @@ impl Instruction {
             Instruction::ThreadCreate(_) => RawInstruction::ThreadCreate,
             Instruction::ThreadJoin(_) => RawInstruction::ThreadJoin,
             Instruction::Assert(_, _) => RawInstruction::Assert,
-            #[cfg(debug_assertions)]
             Instruction::Dbg(_) => RawInstruction::Dbg,
-            #[cfg(debug_assertions)]
             Instruction::Dump(_) => RawInstruction::Dump,
         }
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, IntoPrimitive, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RawInstruction {
     Nop,
     Op,
@@ -129,8 +129,6 @@ pub enum RawInstruction {
     ThreadCreate,
     ThreadJoin,
     Assert,
-    #[cfg(debug_assertions)]
     Dbg,
-    #[cfg(debug_assertions)]
     Dump,
 }

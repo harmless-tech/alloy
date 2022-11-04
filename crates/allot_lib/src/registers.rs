@@ -1,4 +1,6 @@
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
+use num_enum::{IntoPrimitive, TryFromPrimitive};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, IntoPrimitive, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Register {
     R0 = 0,
@@ -33,43 +35,4 @@ pub enum Register {
     R29 = 29,
 
     None = 255,
-}
-impl Register {
-    #[deprecated(note = "Will switch over to num_enum crate.")]
-    pub fn cast(byte: u8) -> Self {
-        match byte {
-            0 => Register::R0,
-            1 => Register::R1,
-            2 => Register::R2,
-            3 => Register::R3,
-            4 => Register::R4,
-            5 => Register::R5,
-            6 => Register::R6,
-            7 => Register::R7,
-            8 => Register::R8,
-            9 => Register::R9,
-            10 => Register::R10,
-            11 => Register::R11,
-            12 => Register::R12,
-            13 => Register::R13,
-            14 => Register::R14,
-            15 => Register::R15,
-            16 => Register::R16,
-            17 => Register::R17,
-            18 => Register::R18,
-            19 => Register::R19,
-            20 => Register::R20,
-            21 => Register::R21,
-            22 => Register::R22,
-            23 => Register::R23,
-            24 => Register::R24,
-            25 => Register::R25,
-            26 => Register::R26,
-            27 => Register::R27,
-            28 => Register::R28,
-            29 => Register::R29,
-            255 => Register::None,
-            _ => panic!("Invalid Register byte: {byte}"),
-        }
-    }
 }

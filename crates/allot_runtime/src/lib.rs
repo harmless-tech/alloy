@@ -11,6 +11,7 @@ mod operations;
 #[doc(hidden)]
 pub use allot_lib::*;
 
+// TODO: Make all fields public or write functions that modifiy fields?
 pub struct AllotRuntime {
     current: usize,
     instructions: Arc<Vec<Instruction>>,
@@ -231,6 +232,7 @@ impl AllotRuntime {
             }
             Instruction::Assert(reg, t) => {
                 // TODO: This is a kinda icky way to do this. Maybe check type first, then do Equal?
+                // TODO: Should asserts be debug only?
                 let val = self.registers.clone(*reg);
                 let result = operations::solve_2(&OpPrim2::Equal, val, t.clone());
                 if let Type::Boolean(b) = result {
@@ -244,26 +246,32 @@ impl AllotRuntime {
                 }
             }
 
-            // Only available in debug builds.
-            #[cfg(debug_assertions)]
+            // Only runs in debug builds.
+            #[allow(unused_variables)]
             Instruction::Dbg(reg) => {
-                println!("Register {:?}", &reg);
-                let val = self.registers.get(*reg);
-                dbg!(val);
+                #[cfg(debug_assertions)]
+                {
+                    println!("Register {:?}", &reg);
+                    let val = self.registers.get(*reg);
+                    dbg!(val);
+                }
             }
-            #[cfg(debug_assertions)]
+            #[allow(unused_variables)]
             Instruction::Dump(opts) => {
-                if opts & 0b00000001 != 0 {
-                    dbg!(&self.instructions);
-                }
-                if opts & 0b00000010 != 0 {
-                    dbg!(&self.registers);
-                }
-                if opts & 0b00000100 != 0 {
-                    dbg!(&self.stack_frames);
-                }
-                if opts & 0b00001000 != 0 {
-                    dbg!(&self.heap);
+                #[cfg(debug_assertions)]
+                {
+                    if opts & 0b00000001 != 0 {
+                        dbg!(&self.instructions);
+                    }
+                    if opts & 0b00000010 != 0 {
+                        dbg!(&self.registers);
+                    }
+                    if opts & 0b00000100 != 0 {
+                        dbg!(&self.stack_frames);
+                    }
+                    if opts & 0b00001000 != 0 {
+                        dbg!(&self.heap);
+                    }
                 }
             }
         }

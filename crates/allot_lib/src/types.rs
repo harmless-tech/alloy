@@ -1,3 +1,5 @@
+use num_enum::{IntoPrimitive, TryFromPrimitive};
+
 use crate::Register;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
@@ -59,7 +61,8 @@ impl Type {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, IntoPrimitive, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RawType {
     None,
 

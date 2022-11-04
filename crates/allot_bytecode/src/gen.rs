@@ -1,6 +1,6 @@
 use allot_lib::{Instruction, Operation, Register, Type};
 
-use crate::{Buffer, ByteForm, BYTECODE_VERSION};
+use crate::{Buffer, BYTECODE_VERSION};
 
 pub fn gen(instructions: Vec<Instruction>) -> Vec<u8> {
     let mut buffer = Buffer::new();
@@ -26,7 +26,7 @@ pub fn gen(instructions: Vec<Instruction>) -> Vec<u8> {
             }
             Instruction::Cast(v1, v2) => {
                 write_register(&mut buffer, &v1);
-                buffer.write_u8(v2.to_byte());
+                buffer.write_u8(v2.into());
             }
             Instruction::Lea(v1, v2) => {
                 write_register(&mut buffer, &v1);
@@ -63,9 +63,7 @@ pub fn gen(instructions: Vec<Instruction>) -> Vec<u8> {
                 write_register(&mut buffer, &v1);
                 write_type(&mut buffer, &v2);
             }
-            #[cfg(debug_assertions)]
             Instruction::Dbg(v) => write_register(&mut buffer, &v),
-            #[cfg(debug_assertions)]
             Instruction::Dump(v) => buffer.write_u8(v),
         }
     }
@@ -74,17 +72,17 @@ pub fn gen(instructions: Vec<Instruction>) -> Vec<u8> {
 }
 
 fn write_instruction(buffer: &mut Buffer, i: &Instruction) {
-    let b = i.to_raw().to_byte();
+    let b = i.to_raw().into();
     buffer.write_u8(b);
 }
 
 fn write_register(buffer: &mut Buffer, r: &Register) {
-    let b = r.to_byte();
+    let b: u8 = (*r).into();
     buffer.write_u8(b);
 }
 
 fn write_type(buffer: &mut Buffer, t: &Type) {
-    let b = t.to_raw().to_byte();
+    let b = t.to_raw().into();
     buffer.write_u8(b);
 
     match t {
@@ -113,6 +111,6 @@ fn write_type(buffer: &mut Buffer, t: &Type) {
 }
 
 fn write_op(buffer: &mut Buffer, o: &Operation) {
-    let b = o.to_byte();
+    let b: u8 = (*o).into();
     buffer.write_u8(b);
 }

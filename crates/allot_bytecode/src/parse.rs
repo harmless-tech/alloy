@@ -2,7 +2,7 @@ use allot_lib::{
     Instruction, Instruction::Cast, Operation, RawInstruction, RawType, Register, Type,
 };
 
-use crate::{Buffer, ByteForm, BYTECODE_VERSION};
+use crate::{Buffer, BYTECODE_VERSION};
 
 pub fn parse(bytes: Vec<u8>) -> Vec<Instruction> {
     let mut instructions = Vec::new();
@@ -22,7 +22,8 @@ pub fn parse(bytes: Vec<u8>) -> Vec<Instruction> {
 }
 
 fn read_instruction(buffer: &mut Buffer) -> Instruction {
-    let raw = RawInstruction::from_byte(buffer.read_u8());
+    let raw = RawInstruction::try_from(buffer.read_u8())
+        .expect("Byte did not translate into RawInstruction.");
     match raw {
         RawInstruction::Nop => Instruction::Nop,
         RawInstruction::Op => Instruction::Op(
@@ -31,7 +32,10 @@ fn read_instruction(buffer: &mut Buffer) -> Instruction {
         ),
         RawInstruction::Mov => Instruction::Mov(read_register(buffer), read_type(buffer)),
         RawInstruction::Cpy => Instruction::Cpy(read_register(buffer), read_register(buffer)),
-        RawInstruction::Cast => Cast(read_register(buffer), RawType::from_byte(buffer.read_u8())),
+        RawInstruction::Cast => Cast(
+            read_register(buffer),
+            RawType::try_from(buffer.read_u8()).expect("Byte did not translate into RawType."),
+        ),
         RawInstruction::Lea => Instruction::Lea(read_register(buffer), buffer.read_u64() as usize),
         RawInstruction::Jmp => {
             let reg = read_register(buffer);
@@ -63,19 +67,17 @@ fn read_instruction(buffer: &mut Buffer) -> Instruction {
         RawInstruction::ThreadCreate => Instruction::ThreadCreate(read_type(buffer)),
         RawInstruction::ThreadJoin => Instruction::ThreadJoin(read_register(buffer)),
         RawInstruction::Assert => Instruction::Assert(read_register(buffer), read_type(buffer)),
-        #[cfg(debug_assertions)]
         RawInstruction::Dbg => Instruction::Dbg(read_register(buffer)),
-        #[cfg(debug_assertions)]
         RawInstruction::Dump => Instruction::Dump(buffer.read_u8()),
     }
 }
 
 fn read_register(buffer: &mut Buffer) -> Register {
-    Register::from_byte(buffer.read_u8())
+    Register::try_from(buffer.read_u8()).expect("Byte did not translate into Register.")
 }
 
 fn read_type(buffer: &mut Buffer) -> Type {
-    let raw = RawType::from_byte(buffer.read_u8());
+    let raw = RawType::try_from(buffer.read_u8()).expect("Byte did not translate into RawType.");
     match raw {
         RawType::None => Type::None,
         RawType::Int8 => Type::Int8(buffer.read_i8()),
@@ -102,5 +104,5 @@ fn read_type(buffer: &mut Buffer) -> Type {
 }
 
 fn read_op(buffer: &mut Buffer) -> Operation {
-    Operation::from_byte(buffer.read_u8())
+    Operation::try_from(buffer.read_u8()).expect("Byte did not translate into Operation.")
 }
