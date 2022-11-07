@@ -133,7 +133,7 @@ jobs:
           files: ./target/release/allot
           dest: x86_64-unknown-linux-gnu.zip
       - name: Upload to release
-        uses: alexellis/upload-assets@0.3.0
+        uses: alexellis/upload-assets@0.4.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -163,7 +163,7 @@ jobs:
           files: ./target/release/allot
           dest: x86_64-apple-darwin.zip
       - name: Upload to release
-        uses: alexellis/upload-assets@0.3.0
+        uses: alexellis/upload-assets@0.4.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -193,7 +193,7 @@ jobs:
           files: ./target/release/allot.exe
           dest: x86_64-pc-windows-msvc.zip
       - name: Upload to release
-        uses: alexellis/upload-assets@0.3.0
+        uses: alexellis/upload-assets@0.4.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -229,7 +229,7 @@ jobs:
           files: ./target/release/allot
           dest: aarch64-apple-darwin.zip
       - name: Upload to release
-        uses: alexellis/upload-assets@0.3.0
+        uses: alexellis/upload-assets@0.4.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -276,7 +276,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '[${{ matrix.target }}.zip]'
+          asset_paths: '["${{ matrix.target }}.zip"]'
 
   publish:
     needs: [x86_64-unknown-linux-gnu, x86_64-apple-darwin, x86_64-pc-windows-msvc, aarch64-apple-darwin, cross-builds]
