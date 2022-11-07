@@ -9,4 +9,7 @@ pub struct Args {
     /// Compile an allot_asm file to bytecode. (Requires the asm feature)
     #[arg(short, long)]
     pub asm: bool,
+    /// Compile an allot_asm file to bytecode then runs it. (Requires the asm feature)
+    #[arg(short, long)]
+    pub run: bool,
 }

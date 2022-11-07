@@ -52,5 +52,4 @@ pkg PACKAGE:
     cargo package --list --allow-dirty --no-verify -p {{PACKAGE}}
 
 prg NAME:
-    cargo run --release -- --asm ./crates/allot_asm/programs/{{NAME}}.ala
-    cargo run --release -- ./crates/allot_asm/programs/{{NAME}}.allot
+    cargo run --release -- --run ./crates/allot_asm/programs/{{NAME}}.ala
