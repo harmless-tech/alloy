@@ -91,44 +91,34 @@ jobs:
   aarch64-unknown-linux-gnu:
     runs-on: ubuntu-latest
     steps:
-      - name: Set Swap Space
-        uses: pierotofy/set-swap-space@v1.0
-        with:
-          swap-size-gb: 10
+#      - name: Set Swap Space
+#        uses: pierotofy/set-swap-space@v1.0
+#        with:
+#          swap-size-gb: 10
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
-            cargo-cache
+            ~/.cargo/registry
+            ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-aarch64-unknown-linux-gnu-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v2
-      - name: Create Directory
-        run: |
-          mkdir -p cargo-cache
-          mkdir -p cargo-cache/git
-          mkdir -p cargo-cache/registry
-      - name: Docker CMD
-        run: |
-          docker run --rm \
-          --platform linux/arm64 \
-          --memory="6g" --memory-swap="10g" \
-          -v ${{ github.workspace }}/cargo-cache/registry:/usr/local/cargo/registry \
-          -v ${{ github.workspace }}/cargo-cache/git:/usr/local/cargo/git \
-          -v ${{ github.workspace }}:/build -w /build \
-          rust:latest \
-          bash -c 'rustc --version && cargo test --verbose --workspace --all-features && cargo build --verbose --workspace'
-      - name: Permission fix
-        run: |
-          sudo chown -R $USER cargo-cache
-          sudo chown -R $USER target
+      - name: Install cross-compilation tools
+        uses: taiki-e/setup-cross-toolchain-action@v1
+        with:
+          target: aarch64-unknown-linux-gnu
+      - name: Run tests
+        run: cargo test --verbose --workspace --all-features
+      - name: Build
+        run: cargo build --verbose --workspace
       - name: Artifact
         uses: actions/upload-artifact@v3
         with:
           name: aarch64-unknown-linux-gnu
           path: |
-            target/debug/allot
+            target/aarch64-unknown-linux-gnu/debug/allot
 
   aarch64-apple-darwin:
     runs-on: macos-latest
