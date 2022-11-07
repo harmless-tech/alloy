@@ -1,9 +1,9 @@
 [package]
-name = "allot_lib"
+name = "allot_codegen"
 version = "0.0.2-alpha"
 edition = "2021"
 authors = ["harmless-tech"]
-description = "A highly experminal language runtime"
+description = "Macros for allot"
 readme = "README.md"
 homepage = "https://harmless.tech/languages/allot"
 repository = "https://github.com/harmless-tech/allot"
@@ -12,8 +12,19 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-allot_codegen = { version = "0.0.2-alpha", path = "../allot_codegen" }
+proc-macro2 = "1.0.47"
+quote = "1.0.21"
+syn = "1.0.103"
+
+[dev-dependencies]
 num_enum = "0.5.7"
+
+[lib]
+proc-macro = true
+
+[[test]]
+name = "raw_enum"
+path = "tests/raw_enum.rs"
 
 [package.metadata.docs.rs]
 all-features = true

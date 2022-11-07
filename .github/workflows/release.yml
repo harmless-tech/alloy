@@ -300,6 +300,8 @@ jobs:
         run: rustc --version
       - name: Publish
         run: |
+          cargo publish --token ${CRATES_TOKEN} -p allot_codegen
+          sleep 30
           cargo publish --token ${CRATES_TOKEN} -p allot_lib
           sleep 30
           cargo publish --token ${CRATES_TOKEN} -p allot_asm

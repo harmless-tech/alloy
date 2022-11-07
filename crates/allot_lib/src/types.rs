@@ -1,8 +1,9 @@
+use allot_codegen::RawEnum;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use crate::Register;
 
-#[derive(Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, RawEnum)]
 pub enum Type {
     None,
 
@@ -32,64 +33,4 @@ pub enum Type {
     Address(usize),
     Pointer(usize),
     Register(Register),
-}
-impl Type {
-    pub fn to_raw(&self) -> RawType {
-        match self {
-            Type::None => RawType::None,
-            Type::Int8(_) => RawType::Int8,
-            Type::Int16(_) => RawType::Int16,
-            Type::Int32(_) => RawType::Int32,
-            Type::Int(_) => RawType::Int,
-            Type::Int64(_) => RawType::Int64,
-            Type::Int128(_) => RawType::Int128,
-            Type::UInt8(_) => RawType::UInt8,
-            Type::UInt16(_) => RawType::UInt16,
-            Type::UInt32(_) => RawType::UInt32,
-            Type::UInt(_) => RawType::UInt,
-            Type::UInt64(_) => RawType::UInt64,
-            Type::UInt128(_) => RawType::UInt128,
-            Type::Float32(_) => RawType::Float32,
-            Type::Float64(_) => RawType::Float64,
-            Type::Char(_) => RawType::Char,
-            Type::String(_) => RawType::String,
-            Type::Boolean(_) => RawType::Boolean,
-            Type::Address(_) => RawType::Address,
-            Type::Pointer(_) => RawType::Pointer,
-            Type::Register(_) => RawType::Register,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, IntoPrimitive, TryFromPrimitive)]
-#[repr(u8)]
-pub enum RawType {
-    None,
-
-    // Numeric
-    Int8,
-    Int16,
-    Int32,
-    Int,
-    Int64,
-    Int128,
-    UInt8,
-    UInt16,
-    UInt32,
-    UInt,
-    UInt64,
-    UInt128,
-
-    Float32,
-    Float64,
-
-    // Text
-    Char,
-    String,
-
-    // Other
-    Boolean,
-    Address,
-    Pointer,
-    Register,
 }

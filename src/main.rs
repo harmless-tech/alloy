@@ -9,6 +9,8 @@ use mimalloc::MiMalloc;
 
 /// File Exts: asm: .ala, bytecode (program): .allot
 
+// TODO: Run away memory problem? Doesn't run on github actions docker.
+
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 

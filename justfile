@@ -12,6 +12,10 @@ check:
     cargo +nightly fmt --check
     cargo clippy --all-targets --all-features --workspace -- -D warnings
 
+c PACKAGE:
+    cargo +nightly fmt --check
+    cargo clippy --all-targets --all-features -p {{PACKAGE}} -- -D warnings
+
 checkr:
     cargo +nightly fmt --check
     cargo clippy --all-targets --all-features --workspace --release -- -D warnings
@@ -36,6 +40,9 @@ bench-native:
 
 build:
     cargo build --workspace
+
+b PACKAGE:
+    cargo build -p {{PACKAGE}}
 
 buildr: check test
     cargo build --release --workspace

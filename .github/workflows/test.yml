@@ -113,6 +113,7 @@ jobs:
         run: |
           docker run --rm \
           --platform linux/arm64 \
+          --memory="6g" --memory-swap="10g" \
           -v ${{ github.workspace }}/cargo-cache/registry:/usr/local/cargo/registry \
           -v ${{ github.workspace }}/cargo-cache/git:/usr/local/cargo/git \
           -v ${{ github.workspace }}:/build -w /build \

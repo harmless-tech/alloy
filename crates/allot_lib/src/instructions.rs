@@ -1,10 +1,9 @@
+use allot_codegen::RawEnum;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use crate::{Operation, RawType, Register, Type};
 
-// TODO: Should Instruction impl num_enum or just RawInstruction.
-
-#[derive(Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, RawEnum)]
 pub enum Instruction {
     /// Does nothing.
     Nop,
@@ -72,63 +71,4 @@ pub enum Instruction {
     Dbg(Register),
     /// Prints all registers, stack frames, and the heap. (Debug builds only)
     Dump(u8),
-}
-impl Instruction {
-    pub fn to_raw(&self) -> RawInstruction {
-        match self {
-            Instruction::Nop => RawInstruction::Nop,
-            Instruction::Op(_, _) => RawInstruction::Op,
-            Instruction::Mov(_, _) => RawInstruction::Mov,
-            Instruction::Cpy(_, _) => RawInstruction::Cpy,
-            Instruction::Cast(_, _) => RawInstruction::Cast,
-            Instruction::Lea(_, _) => RawInstruction::Lea,
-            Instruction::Jmp(_, _) => RawInstruction::Jmp,
-            Instruction::Ret => RawInstruction::Ret,
-            Instruction::Call(_) => RawInstruction::Call,
-            Instruction::Exit(_) => RawInstruction::Exit,
-            Instruction::Push(_) => RawInstruction::Push,
-            Instruction::PushCpy(_) => RawInstruction::PushCpy,
-            Instruction::Pop(_) => RawInstruction::Pop,
-            Instruction::PopMany(_) => RawInstruction::PopMany,
-            Instruction::StackCpy(_, _) => RawInstruction::StackCpy,
-            Instruction::PushFrame(_) => RawInstruction::PushFrame,
-            Instruction::PopFrame => RawInstruction::PopFrame,
-            Instruction::TakeFrom => RawInstruction::TakeFrom,
-            Instruction::GiveTo => RawInstruction::GiveTo,
-            Instruction::ThreadCreate(_) => RawInstruction::ThreadCreate,
-            Instruction::ThreadJoin(_) => RawInstruction::ThreadJoin,
-            Instruction::Assert(_, _) => RawInstruction::Assert,
-            Instruction::Dbg(_) => RawInstruction::Dbg,
-            Instruction::Dump(_) => RawInstruction::Dump,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, IntoPrimitive, TryFromPrimitive)]
-#[repr(u8)]
-pub enum RawInstruction {
-    Nop,
-    Op,
-    Mov,
-    Cpy,
-    Cast,
-    Lea,
-    Jmp,
-    Ret,
-    Call,
-    Exit,
-    Push,
-    PushCpy,
-    Pop,
-    PopMany,
-    StackCpy,
-    PushFrame,
-    PopFrame,
-    TakeFrom,
-    GiveTo,
-    ThreadCreate,
-    ThreadJoin,
-    Assert,
-    Dbg,
-    Dump,
 }
