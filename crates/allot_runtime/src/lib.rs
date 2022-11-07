@@ -11,13 +11,12 @@ mod operations;
 #[doc(hidden)]
 pub use allot_lib::*;
 
-// TODO: Make all fields public or write functions that modifiy fields?
 pub struct AllotRuntime {
-    current: usize,
-    instructions: Arc<Vec<Instruction>>,
-    registers: Registers,
-    stack_frames: Vec<StackFrame>,
-    heap: CrossHeap,
+    pub current: usize,
+    pub instructions: Arc<Vec<Instruction>>,
+    pub registers: Registers,
+    pub stack_frames: Vec<StackFrame>,
+    pub heap: CrossHeap,
 }
 impl AllotRuntime {
     pub fn new(instructions: Vec<Instruction>) -> Self {
@@ -232,11 +231,9 @@ impl AllotRuntime {
             }
             Instruction::Assert(reg, t) => {
                 // TODO: This is a kinda icky way to do this. Maybe check type first, then do Equal?
-                // TODO: Should asserts be debug only?
                 let val = self.registers.clone(*reg);
                 let result = operations::solve_2(&OpPrim2::Equal, val, t.clone());
                 if let Type::Boolean(b) = result {
-                    // println!("Assert: {:?} is {:?}: {}", reg, t, &b); TODO: Should assert have an output?
                     if !b {
                         return Some(-1);
                     }

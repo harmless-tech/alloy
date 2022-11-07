@@ -1,8 +1,4 @@
 use allot_lib::{Instruction, Register, Type};
-use mimalloc::MiMalloc;
-
-#[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
 
 #[test]
 #[cfg(feature = "gen")]

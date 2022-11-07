@@ -27,7 +27,7 @@ allot_bytecode = { version = "0.0.2-alpha", path = "crates/allot_bytecode", defa
 allot_runtime = { version = "0.0.2-alpha", path = "crates/allot_runtime" }
 anyhow = "1.0.66"
 clap = { version = "4.0.18", features = ["derive"] }
-mimalloc = { version = "0.1.30", default-features = false }
+mimalloc = { version = "0.1.30", default-features = false, optional = true }
 
 [features]
 default = ["asm"]

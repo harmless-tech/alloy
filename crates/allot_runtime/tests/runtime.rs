@@ -6,10 +6,6 @@ use allot_lib::{
     Type,
 };
 use allot_runtime::AllotRuntime;
-use mimalloc::MiMalloc;
-
-#[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
 
 #[test]
 fn mov() {

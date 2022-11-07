@@ -88,48 +88,6 @@ jobs:
           path: |
             target/debug/allot.exe
 
-  aarch64-unknown-linux-gnu:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set Swap Space
-        uses: pierotofy/set-swap-space@v1.0
-        with:
-          swap-size-gb: 10
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            cargo-cache
-            target
-          key: ${{ runner.os }}-cargo-aarch64-unknown-linux-gnu-${{ hashFiles('**/Cargo.lock') }}
-      - name: Docker Setup QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Create Directory
-        run: |
-          mkdir -p cargo-cache
-          mkdir -p cargo-cache/git
-          mkdir -p cargo-cache/registry
-      - name: Docker CMD
-        run: |
-          docker run --rm \
-          --platform linux/arm64 \
-          --memory="6g" --memory-swap="10g" \
-          -v ${{ github.workspace }}/cargo-cache/registry:/usr/local/cargo/registry \
-          -v ${{ github.workspace }}/cargo-cache/git:/usr/local/cargo/git \
-          -v ${{ github.workspace }}:/build -w /build \
-          rust:latest \
-          bash -c 'rustc --version && cargo test --verbose --workspace --all-features && cargo build --verbose --workspace'
-      - name: Permission fix
-        run: |
-          sudo chown -R $USER cargo-cache
-          sudo chown -R $USER target
-      - name: Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: aarch64-unknown-linux-gnu
-          path: |
-            target/debug/allot
-
   aarch64-apple-darwin:
     runs-on: macos-latest
     steps:
@@ -160,3 +118,42 @@ jobs:
           name: aarch64-apple-darwin
           path: |
             target/aarch64-apple-darwin/debug/allot
+
+  cross-builds:
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - riscv64gc-unknown-linux-gnu
+          - i686-unknown-linux-gnu
+          - powerpc64-unknown-linux-gnu
+          - powerpc64le-unknown-linux-gnu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Update Rust
+        run: rustup update
+      - name: Rust Version
+        run: rustc --version
+      - uses: taiki-e/install-action@v1
+        with:
+          tool: cross
+      - name: Run tests
+        run: cross test --verbose --workspace --all-features --target ${{ matrix.target }}
+      - name: Build
+        run: cross build --verbose --workspace --target ${{ matrix.target }}
+      - name: Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            target/${{ matrix.target }}/debug/allot
