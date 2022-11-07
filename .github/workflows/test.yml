@@ -119,43 +119,43 @@ jobs:
           path: |
             target/aarch64-apple-darwin/debug/allot
 
-    cross-builds:
-      strategy:
-        matrix:
-          target:
-            - aarch64-unknown-linux-gnu
-            - aarch64-unknown-linux-musl
-            - riscv64gc-unknown-linux-gnu
-            - x86_64-unknown-freebsd
-            - i686-pc-windows-gnu
-            - i686-unknown-linux-gnu
-            - powerpc64-unknown-linux-gnu
-            - powerpc64le-unknown-linux-gnu
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-        - uses: actions/cache@v3
-          with:
-            path: |
-              ~/.cargo/registry
-              ~/.cargo/git
-              target
-            key: ${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
-        - name: Update Rust
-          run: rustup update
-        - name: Rust Version
-          run: rustc --version
-        - name: Install cross-compilation tools
-          uses: taiki-e/setup-cross-toolchain-action@v1
-          with:
-            target: ${{ matrix.target }}
-        - name: Run tests
-          run: cargo test --verbose --workspace --all-features
-        - name: Build
-          run: cargo build --verbose --workspace
-        - name: Artifact
-          uses: actions/upload-artifact@v3
-          with:
-            name: ${{ matrix.target }}
-            path: |
-              target/${{ matrix.target }}/debug/allot
+  cross-builds:
+    strategy:
+      matrix:
+        target:
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - riscv64gc-unknown-linux-gnu
+          - x86_64-unknown-freebsd
+          - i686-pc-windows-gnu
+          - i686-unknown-linux-gnu
+          - powerpc64-unknown-linux-gnu
+          - powerpc64le-unknown-linux-gnu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Update Rust
+        run: rustup update
+      - name: Rust Version
+        run: rustc --version
+      - name: Install cross-compilation tools
+        uses: taiki-e/setup-cross-toolchain-action@v1
+        with:
+          target: ${{ matrix.target }}
+      - name: Run tests
+        run: cargo test --verbose --workspace --all-features
+      - name: Build
+        run: cargo build --verbose --workspace
+      - name: Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            target/${{ matrix.target }}/debug/allot
