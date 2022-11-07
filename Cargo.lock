@@ -36,7 +36,6 @@ name = "allot_bytecode"
 version = "0.0.2-alpha"
 dependencies = [
  "allot_lib",
- "mimalloc",
 ]
 
 [[package]]
@@ -63,7 +62,6 @@ version = "0.0.2-alpha"
 dependencies = [
  "allot_lib",
  "criterion",
- "mimalloc",
  "phf",
 ]
 
