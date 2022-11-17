@@ -26,12 +26,13 @@ allot_asm = { version = "0.0.2-alpha", path = "crates/allot_asm", optional = tru
 allot_bytecode = { version = "0.0.2-alpha", path = "crates/allot_bytecode", default-features = false, features = ["parse"]}
 allot_runtime = { version = "0.0.2-alpha", path = "crates/allot_runtime" }
 anyhow = "1.0.66"
-clap = { version = "4.0.18", features = ["derive"] }
-mimalloc = { version = "0.1.30", default-features = false, optional = true }
+clap = { version = "4.0.26", features = ["derive"] }
+mimalloc = { version = "0.1.32", default-features = false, optional = true }
 
 [features]
 default = ["asm"]
 asm = ["allot_asm", "allot_bytecode/gen"]
+mimalloc = ["dep:mimalloc"]
 
 [workspace]
 members = ["crates/*"]
