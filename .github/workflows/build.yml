@@ -1,9 +1,10 @@
-name: Rust Build, Test, and Release
+name: Rust Build and Test
 
 on:
   push:
-    tags:
-      - "v**"
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 env:
@@ -45,7 +46,7 @@ jobs:
       - name: Rust Version
         run: rustc --version
       - name: Clippy Check
-        run: cargo clippy --all-targets --all-features --verbose --workspace --release -- -D warnings
+        run: cargo clippy --all-targets --all-features --verbose --workspace -- -D warnings
 
   deps:
     runs-on: ubuntu-latest
@@ -83,56 +84,9 @@ jobs:
           path: .cargo-store
           retention-days: 1
 
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-regex-match@v2
-        id: regex-tag
-        with:
-          text: ${{ github.ref }}
-          regex: '^refs\/tags\/v\d+\.\d+\.\d+$'
-      - name: Create release
-        uses: ncipollo/release-action@v1
-        with:
-          prerelease: ${{ steps.regex-tag.outputs.match == '' }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  publish:
-    needs: [ check-fmt, check-clippy, x86_64-unknown-linux-gnu, x86_64-apple-darwin, aarch64-apple-darwin, x86_64-pc-windows-msvc, i686-pc-windows-msvc, cross ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Download Deps
-        uses: actions/download-artifact@v3
-        with:
-          name: crate-deps
-      - name: Move Deps
-        run: |
-          mv ./.cargo-store/* ~/.cargo
-      - name: Update Rust
-        run: rustup update
-      - name: Rust Version
-        run: rustc --version
-      - name: Publish
-        run: |
-          cargo publish --token ${CRATES_TOKEN} -p allot_codegen
-          sleep 30
-          cargo publish --token ${CRATES_TOKEN} -p allot_lib
-          sleep 30
-          cargo publish --token ${CRATES_TOKEN} -p allot_asm
-          sleep 30
-          cargo publish --token ${CRATES_TOKEN} -p allot_bytecode
-          sleep 30
-          cargo publish --token ${CRATES_TOKEN} -p allot_runtime
-          sleep 30
-          cargo publish --token ${CRATES_TOKEN} -p allot
-        env:
-          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
-
   x86_64-unknown-linux-gnu:
     runs-on: ubuntu-latest
-    needs: [ deps, release ]
+    needs: [ deps ]
     steps:
       - uses: actions/checkout@v3
       - name: Download Deps
@@ -152,33 +106,19 @@ jobs:
       - name: Rust Version
         run: rustc --version
       - name: Run tests
-        run: cargo test --verbose --workspace --all-features --release
+        run: cargo test --verbose --workspace --all-features
       - name: Build
-        run: cargo build --verbose --workspace --release
+        run: cargo build --verbose --workspace
       - name: Artifact
         uses: actions/upload-artifact@v3
         with:
           name: x86_64-unknown-linux-gnu
           path: |
-            target/release/${{ env.bin-name }}
-      - name: Tar
-        uses: a7ul/tar-action@v1.1.2
-        with:
-          command: c
-          cwd: ./target/release
-          files: |
-            ${{ env.bin-name }}
-          outPath: x86_64-unknown-linux-gnu.tar.gz
-      - name: Upload to release
-        uses: alexellis/upload-assets@0.4.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["x86_64-unknown-linux-gnu.tar.gz"]'
+            target/debug/${{ env.bin-name }}
 
   x86_64-apple-darwin:
     runs-on: macos-latest
-    needs: [ deps, release ]
+    needs: [ deps ]
     steps:
       - uses: actions/checkout@v3
       - name: Download Deps
@@ -198,33 +138,19 @@ jobs:
       - name: Rust Version
         run: rustc --version
       - name: Run tests
-        run: cargo test --verbose --workspace --all-features --release
+        run: cargo test --verbose --workspace --all-features
       - name: Build
-        run: cargo build --verbose --workspace --release
+        run: cargo build --verbose --workspace
       - name: Artifact
         uses: actions/upload-artifact@v3
         with:
           name: x86_64-apple-darwin
           path: |
-            target/release/${{ env.bin-name }}
-      - name: Tar
-        uses: a7ul/tar-action@v1.1.2
-        with:
-          command: c
-          cwd: ./target/release
-          files: |
-            ${{ env.bin-name }}
-          outPath: x86_64-apple-darwin.tar.gz
-      - name: Upload to release
-        uses: alexellis/upload-assets@0.4.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["x86_64-apple-darwin.tar.gz"]'
+            target/debug/${{ env.bin-name }}
 
   aarch64-apple-darwin:
     runs-on: macos-latest
-    needs: [ deps, release ]
+    needs: [ deps ]
     steps:
       - uses: actions/checkout@v3
       - name: Download Deps
@@ -250,31 +176,17 @@ jobs:
           export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
           export MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx --show-sdk-platform-version)
       - name: Build
-        run: cargo build --verbose --workspace --target aarch64-apple-darwin --release
+        run: cargo build --verbose --workspace --target aarch64-apple-darwin
       - name: Artifact
         uses: actions/upload-artifact@v3
         with:
           name: aarch64-apple-darwin
           path: |
-            target/aarch64-apple-darwin/release/${{ env.bin-name }}
-      - name: Tar
-        uses: a7ul/tar-action@v1.1.2
-        with:
-          command: c
-          cwd: ./target/aarch64-apple-darwin/release
-          files: |
-            ${{ env.bin-name }}
-          outPath: aarch64-apple-darwin.tar.gz
-      - name: Upload to release
-        uses: alexellis/upload-assets@0.4.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["aarch64-apple-darwin.tar.gz"]'
+            target/aarch64-apple-darwin/debug/${{ env.bin-name }}
 
   x86_64-pc-windows-msvc:
     runs-on: windows-latest
-    needs: [ deps, release ]
+    needs: [ deps ]
     steps:
       - uses: actions/checkout@v3
       - name: Download Deps
@@ -294,30 +206,19 @@ jobs:
       - name: Rust Version
         run: rustc --version
       - name: Run tests
-        run: cargo test --verbose --workspace --all-features --release
+        run: cargo test --verbose --workspace --all-features
       - name: Build
-        run: cargo build --verbose --workspace --release
+        run: cargo build --verbose --workspace
       - name: Artifact
         uses: actions/upload-artifact@v3
         with:
           name: x86_64-pc-windows-msvc
           path: |
-            target/release/${{ env.bin-name }}.exe
-      - name: Zip
-        uses: papeloto/action-zip@v1
-        with:
-          files: ./target/release/${{ env.bin-name }}.exe
-          dest: x86_64-pc-windows-msvc.zip
-      - name: Upload to release
-        uses: alexellis/upload-assets@0.4.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["x86_64-pc-windows-msvc.zip"]'
+            target/debug/${{ env.bin-name }}.exe
 
   i686-pc-windows-msvc:
     runs-on: windows-latest
-    needs: [ deps, release ]
+    needs: [ deps ]
     steps:
       - uses: actions/checkout@v3
       - name: Download Deps
@@ -337,26 +238,15 @@ jobs:
       - name: Rust Version
         run: rustc --version
       - name: Run tests
-        run: cargo test --verbose --workspace --all-features --release --target i686-pc-windows-msvc
+        run: cargo test --verbose --workspace --all-features --target i686-pc-windows-msvc
       - name: Build
-        run: cargo build --verbose --workspace --target i686-pc-windows-msvc --release
+        run: cargo build --verbose --workspace --target i686-pc-windows-msvc
       - name: Artifact
         uses: actions/upload-artifact@v3
         with:
           name: x86_64-pc-windows-msvc
           path: |
-            target/i686-pc-windows-msvc/release/${{ env.bin-name }}.exe
-      - name: Zip
-        uses: papeloto/action-zip@v1
-        with:
-          files: ./target/i686-pc-windows-msvc/release/${{ env.bin-name }}.exe
-          dest: i686-pc-windows-msvc.zip
-      - name: Upload to release
-        uses: alexellis/upload-assets@0.4.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["i686-pc-windows-msvc.zip"]'
+            target/i686-pc-windows-msvc/debug/${{ env.bin-name }}.exe
 
   cross:
     strategy:
@@ -388,7 +278,7 @@ jobs:
           - mipsel-unknown-linux-gnu
           - mipsel-unknown-linux-musl
     runs-on: ubuntu-latest
-    needs: [ deps, release ]
+    needs: [ deps ]
     steps:
       - uses: actions/checkout@v3
       - name: Download Deps
@@ -411,24 +301,10 @@ jobs:
         with:
           tool: cross
       - name: Build
-        run: cross build --verbose --workspace --target ${{ matrix.target }} --release
+        run: cross build --verbose --workspace --target ${{ matrix.target }}
       - name: Artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}
           path: |
-            target/${{ matrix.target }}/release/${{ env.bin-name }}
-      - name: Tar
-        uses: a7ul/tar-action@v1.1.2
-        with:
-          command: c
-          cwd: ./target/${{ matrix.target }}/release
-          files: |
-            ${{ env.bin-name }}
-          outPath: ${{ matrix.target }}.tar.gz
-      - name: Upload to release
-        uses: alexellis/upload-assets@0.4.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["${{ matrix.target }}.tar.gz"]'
+            target/${{ matrix.target }}/debug/${{ env.bin-name }}

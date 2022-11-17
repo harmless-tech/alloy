@@ -6,7 +6,7 @@ Allot is an in-progress, highly experimental language runtime.
 
 First install it using cargo install:
 ```shell
-cargo install allot
+cargo install allot@0.0.2-alpha
 ```
 
 Then to see options:
