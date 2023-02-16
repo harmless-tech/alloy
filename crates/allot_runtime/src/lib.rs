@@ -1,8 +1,8 @@
-use std::sync::{Arc, RwLock};
+use std::{sync::Arc, thread::JoinHandle};
 
 use allot_lib::{Instruction, Register, Type};
 
-use crate::memory::{CrossHeap, Heap, HeapBox, Registers, StackFrame};
+use crate::memory::{CrossHeap, Heap, Registers, StackFrame};
 
 mod library;
 mod memory;
@@ -24,7 +24,7 @@ impl AllotRuntime {
             instructions: Arc::new(instructions),
             registers: Registers::new(),
             stack_frames: vec![StackFrame::default()],
-            heap: Arc::new(RwLock::new(Heap::default())),
+            heap: Heap::cross_new(),
             current: 0,
         }
     }
@@ -34,7 +34,7 @@ impl AllotRuntime {
             instructions,
             registers: Registers::new(),
             stack_frames: vec![StackFrame::default()],
-            heap: Arc::new(RwLock::new(Heap::default())),
+            heap: Heap::cross_new(),
             current: 0,
         }
     }
@@ -120,7 +120,7 @@ impl AllotRuntime {
                     .last_mut()
                     .expect("There was no stack frame to take.");
 
-                let ret = library::call(function.as_str(), r9, stack_frame, &self.heap);
+                let ret = library::call(function.as_str(), r9, stack_frame, &mut self.heap);
                 self.registers.insert(Register::R10, ret);
             }
             Instruction::Exit(t) => {
@@ -204,8 +204,8 @@ impl AllotRuntime {
                 });
 
                 let i = {
-                    let mut heap = self.heap.write().unwrap();
-                    heap.push(HeapBox::ThreadHandle(Box::new(handle)))
+                    let mut heap = self.heap.lock().unwrap();
+                    heap.push(handle)
                 };
                 self.registers.insert(Register::R0, i);
             }
@@ -216,18 +216,13 @@ impl AllotRuntime {
                 };
 
                 let handle = {
-                    let mut heap = self.heap.write().unwrap();
-                    heap.take(*pointer)
+                    let mut heap = self.heap.lock().unwrap();
+                    heap.take::<JoinHandle<(i32, StackFrame)>>(*pointer)
                 };
 
-                match handle {
-                    HeapBox::ThreadHandle(handle) => {
-                        let ret = handle.join().expect("Fatal error on thread join.");
-                        self.registers.insert(Register::R0, Type::Int32(ret.0));
-                        self.stack_frames.push(ret.1);
-                    }
-                    _ => panic!("ThreadJoin tried to get a ThreadHandle, but the pointer did not lead to one.")
-                }
+                let ret = handle.join().expect("Fatal error on thread join.");
+                self.registers.insert(Register::R0, Type::Int32(ret.0));
+                self.stack_frames.push(ret.1);
             }
             Instruction::Assert(reg, t) => {
                 // TODO: This is a kinda icky way to do this. Maybe check type first, then do Equal?
