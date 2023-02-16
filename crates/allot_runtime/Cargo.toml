@@ -17,7 +17,7 @@ phf = { version = "0.11.1", features = ["macros"] }
 
 [dev-dependencies]
 criterion = "0.4.0"
-mimalloc = { version = "0.1.32", default-features = false }
+mimalloc = { version = "0.1.34", default-features = false }
 
 [[test]]
 name = "tests"

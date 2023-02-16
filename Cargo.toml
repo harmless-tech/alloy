@@ -25,12 +25,12 @@ path = "src/main.rs"
 allot_asm = { version = "0.0.3-alpha", path = "crates/allot_asm", optional = true }
 allot_bytecode = { version = "0.0.3-alpha", path = "crates/allot_bytecode", default-features = false, features = ["parse"]}
 allot_runtime = { version = "0.0.3-alpha", path = "crates/allot_runtime" }
-anyhow = "1.0.66"
-clap = { version = "4.0.26", features = ["derive"] }
-mimalloc = { version = "0.1.32", default-features = false, optional = true }
+anyhow = "1.0.69"
+clap = { version = "4.1.6", features = ["derive"] }
+mimalloc = { version = "0.1.34", default-features = false, optional = true }
 
 [features]
-default = ["asm"]
+default = ["asm", "mimalloc"]
 asm = ["allot_asm", "allot_bytecode/gen"]
 mimalloc = ["dep:mimalloc"]
 
@@ -41,7 +41,7 @@ members = ["crates/*"]
 opt-level = 3
 lto = true
 codegen-units = 1
-strip = true
+#strip = true TODO: Maybe enable this once on release versions
 
 [package.metadata.docs.rs]
 all-features = true
