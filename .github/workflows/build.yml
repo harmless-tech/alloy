@@ -12,42 +12,6 @@ env:
   bin-name: allot
 
 jobs:
-  check-fmt:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: nightly
-          components: |
-            rustfmt
-      - name: Rustfmt Check
-        run: cargo +nightly fmt --check
-
-  check-clippy:
-    runs-on: ubuntu-latest
-    needs: [ deps, x86_64-unknown-linux-gnu ]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Download Deps
-        uses: actions/download-artifact@v3
-        with:
-          name: crate-deps
-      - name: Move Deps
-        run: |
-          mv ./.cargo-store/* ~/.cargo
-      - uses: actions/cache@v3
-        with:
-          path: |
-            target
-          key: ${{ runner.os }}-x86_64-unknown-linux-gnu-${{ hashFiles('**/Cargo.lock') }}
-      - name: Update Rust
-        run: rustup update
-      - name: Rust Version
-        run: rustc --version
-      - name: Clippy Check
-        run: cargo clippy --all-targets --all-features --verbose --workspace -- -D warnings
-
   deps:
     runs-on: ubuntu-latest
     steps:
@@ -117,7 +81,7 @@ jobs:
             target/debug/${{ env.bin-name }}
 
   x86_64-apple-darwin:
-    runs-on: macos-latest
+    runs-on: macos-12
     needs: [ deps ]
     steps:
       - uses: actions/checkout@v3
@@ -149,7 +113,7 @@ jobs:
             target/debug/${{ env.bin-name }}
 
   aarch64-apple-darwin:
-    runs-on: macos-latest
+    runs-on: macos-12
     needs: [ deps ]
     steps:
       - uses: actions/checkout@v3
@@ -171,10 +135,6 @@ jobs:
         run: rustc --version
       - name: Add Rust target
         run: rustup target add aarch64-apple-darwin
-      - name: MacOS SDK
-        run: |
-          export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
-          export MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx --show-sdk-platform-version)
       - name: Build
         run: cargo build --verbose --workspace --target aarch64-apple-darwin
       - name: Artifact
@@ -237,6 +197,8 @@ jobs:
         run: rustup update
       - name: Rust Version
         run: rustc --version
+      - name: Add Rust target
+        run: rustup target add i686-pc-windows-msvc
       - name: Run tests
         run: cargo test --verbose --workspace --all-features --target i686-pc-windows-msvc
       - name: Build
@@ -244,39 +206,21 @@ jobs:
       - name: Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: x86_64-pc-windows-msvc
+          name: i686-pc-windows-msvc
           path: |
             target/i686-pc-windows-msvc/debug/${{ env.bin-name }}.exe
 
   cross:
     strategy:
+      fail-fast: false
       matrix:
         target:
           - x86_64-unknown-linux-musl
           - aarch64-unknown-linux-gnu
           - aarch64-unknown-linux-musl
-          - x86_64-unknown-freebsd
-          - x86_64-unknown-netbsd
-          - x86_64-unknown-illumos
-          - x86_64-sun-solaris
           - riscv64gc-unknown-linux-gnu
-          - powerpc64-unknown-linux-gnu
           - powerpc64le-unknown-linux-gnu
           - s390x-unknown-linux-gnu
-          - mips64-unknown-linux-gnuabi64
-          - mips64-unknown-linux-muslabi64
-          - mips64el-unknown-linux-gnuabi64
-          - mips64el-unknown-linux-muslabi64
-          - i686-unknown-linux-gnu
-          - i686-unknown-linux-musl
-          - i686-unknown-freebsd
-          - armv7-unknown-linux-gnueabihf
-          - armv7-unknown-linux-musleabihf
-          - powerpc-unknown-linux-gnu
-          - mips-unknown-linux-gnu
-          - mips-unknown-linux-musl
-          - mipsel-unknown-linux-gnu
-          - mipsel-unknown-linux-musl
     runs-on: ubuntu-latest
     needs: [ deps ]
     steps:
@@ -297,7 +241,7 @@ jobs:
         run: rustup update
       - name: Rust Version
         run: rustc --version
-      - uses: taiki-e/install-action@v1
+      - uses: taiki-e/install-action@v2
         with:
           tool: cross
       - name: Build

@@ -2,7 +2,7 @@
 
 Allot is an in-progress, highly experimental language runtime.
 
-### How to Run
+### Install and Run
 
 First install it using cargo install:
 ```shell
