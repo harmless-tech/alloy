@@ -1,6 +1,6 @@
 [package]
 name = "allot_runtime"
-version = "0.0.2-alpha"
+version = "0.0.3-alpha"
 edition = "2021"
 authors = ["harmless-tech"]
 description = "A highly experminal language runtime"
@@ -12,11 +12,12 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-allot_lib = { version = "0.0.2-alpha", path = "../allot_lib" }
+allot_lib = { version = "0.0.3-alpha", path = "../allot_lib" }
 phf = { version = "0.11.1", features = ["macros"] }
 
 [dev-dependencies]
 criterion = "0.4.0"
+mimalloc = { version = "0.1.32", default-features = false }
 
 [[test]]
 name = "tests"

@@ -6,7 +6,7 @@ use crate::memory::Registers;
 pub fn cast(t: &Type, raw: RawType) -> Type {
     match t {
         Type::Int8(v) => match raw {
-            RawType::Int8 => Type::Int8(*v as i8),
+            RawType::Int8 => Type::Int8(*v),
             RawType::Int16 => Type::Int16(*v as i16),
             RawType::Int32 => Type::Int32(*v as i32),
             RawType::Int => Type::Int(*v as isize),
@@ -26,7 +26,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
         },
         Type::Int16(v) => match raw {
             RawType::Int8 => Type::Int8(*v as i8),
-            RawType::Int16 => Type::Int16(*v as i16),
+            RawType::Int16 => Type::Int16(*v),
             RawType::Int32 => Type::Int32(*v as i32),
             RawType::Int => Type::Int(*v as isize),
             RawType::Int64 => Type::Int64(*v as i64),
@@ -46,7 +46,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
         Type::Int32(v) => match raw {
             RawType::Int8 => Type::Int8(*v as i8),
             RawType::Int16 => Type::Int16(*v as i16),
-            RawType::Int32 => Type::Int32(*v as i32),
+            RawType::Int32 => Type::Int32(*v),
             RawType::Int => Type::Int(*v as isize),
             RawType::Int64 => Type::Int64(*v as i64),
             RawType::Int128 => Type::Int128(*v as i128),
@@ -66,7 +66,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::Int8 => Type::Int8(*v as i8),
             RawType::Int16 => Type::Int16(*v as i16),
             RawType::Int32 => Type::Int32(*v as i32),
-            RawType::Int => Type::Int(*v as isize),
+            RawType::Int => Type::Int(*v),
             RawType::Int64 => Type::Int64(*v as i64),
             RawType::Int128 => Type::Int128(*v as i128),
             RawType::UInt8 => Type::UInt8(*v as u8),
@@ -86,7 +86,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::Int16 => Type::Int16(*v as i16),
             RawType::Int32 => Type::Int32(*v as i32),
             RawType::Int => Type::Int(*v as isize),
-            RawType::Int64 => Type::Int64(*v as i64),
+            RawType::Int64 => Type::Int64(*v),
             RawType::Int128 => Type::Int128(*v as i128),
             RawType::UInt8 => Type::UInt8(*v as u8),
             RawType::UInt16 => Type::UInt16(*v as u16),
@@ -106,7 +106,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::Int32 => Type::Int32(*v as i32),
             RawType::Int => Type::Int(*v as isize),
             RawType::Int64 => Type::Int64(*v as i64),
-            RawType::Int128 => Type::Int128(*v as i128),
+            RawType::Int128 => Type::Int128(*v),
             RawType::UInt8 => Type::UInt8(*v as u8),
             RawType::UInt16 => Type::UInt16(*v as u16),
             RawType::UInt32 => Type::UInt32(*v as u32),
@@ -126,7 +126,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::Int => Type::Int(*v as isize),
             RawType::Int64 => Type::Int64(*v as i64),
             RawType::Int128 => Type::Int128(*v as i128),
-            RawType::UInt8 => Type::UInt8(*v as u8),
+            RawType::UInt8 => Type::UInt8(*v),
             RawType::UInt16 => Type::UInt16(*v as u16),
             RawType::UInt32 => Type::UInt32(*v as u32),
             RawType::UInt => Type::UInt(*v as usize),
@@ -146,7 +146,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::Int64 => Type::Int64(*v as i64),
             RawType::Int128 => Type::Int128(*v as i128),
             RawType::UInt8 => Type::UInt8(*v as u8),
-            RawType::UInt16 => Type::UInt16(*v as u16),
+            RawType::UInt16 => Type::UInt16(*v),
             RawType::UInt32 => Type::UInt32(*v as u32),
             RawType::UInt => Type::UInt(*v as usize),
             RawType::UInt64 => Type::UInt64(*v as u64),
@@ -166,7 +166,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::Int128 => Type::Int128(*v as i128),
             RawType::UInt8 => Type::UInt8(*v as u8),
             RawType::UInt16 => Type::UInt16(*v as u16),
-            RawType::UInt32 => Type::UInt32(*v as u32),
+            RawType::UInt32 => Type::UInt32(*v),
             RawType::UInt => Type::UInt(*v as usize),
             RawType::UInt64 => Type::UInt64(*v as u64),
             RawType::UInt128 => Type::UInt128(*v as u128),
@@ -186,7 +186,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::UInt8 => Type::UInt8(*v as u8),
             RawType::UInt16 => Type::UInt16(*v as u16),
             RawType::UInt32 => Type::UInt32(*v as u32),
-            RawType::UInt => Type::UInt(*v as usize),
+            RawType::UInt => Type::UInt(*v),
             RawType::UInt64 => Type::UInt64(*v as u64),
             RawType::UInt128 => Type::UInt128(*v as u128),
             RawType::Float32 => Type::Float32(*v as f32),
@@ -206,7 +206,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::UInt16 => Type::UInt16(*v as u16),
             RawType::UInt32 => Type::UInt32(*v as u32),
             RawType::UInt => Type::UInt(*v as usize),
-            RawType::UInt64 => Type::UInt64(*v as u64),
+            RawType::UInt64 => Type::UInt64(*v),
             RawType::UInt128 => Type::UInt128(*v as u128),
             RawType::Float32 => Type::Float32(*v as f32),
             RawType::Float64 => Type::Float64(*v as f64),
@@ -226,7 +226,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::UInt32 => Type::UInt32(*v as u32),
             RawType::UInt => Type::UInt(*v as usize),
             RawType::UInt64 => Type::UInt64(*v as u64),
-            RawType::UInt128 => Type::UInt128(*v as u128),
+            RawType::UInt128 => Type::UInt128(*v),
             RawType::Float32 => Type::Float32(*v as f32),
             RawType::Float64 => Type::Float64(*v as f64),
             RawType::Char => Type::Char(char::from_u32(*v as u32).unwrap()),
@@ -246,7 +246,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::UInt => Type::UInt(*v as usize),
             RawType::UInt64 => Type::UInt64(*v as u64),
             RawType::UInt128 => Type::UInt128(*v as u128),
-            RawType::Float32 => Type::Float32(*v as f32),
+            RawType::Float32 => Type::Float32(*v),
             RawType::Float64 => Type::Float64(*v as f64),
             RawType::Char => Type::Char(char::from_u32(*v as u32).unwrap()),
             RawType::String => Type::String(v.to_string()),
@@ -266,7 +266,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::UInt64 => Type::UInt64(*v as u64),
             RawType::UInt128 => Type::UInt128(*v as u128),
             RawType::Float32 => Type::Float32(*v as f32),
-            RawType::Float64 => Type::Float64(*v as f64),
+            RawType::Float64 => Type::Float64(*v),
             RawType::Char => Type::Char(char::from_u32(*v as u32).unwrap()),
             RawType::String => Type::String(v.to_string()),
             _ => panic!("Cannot cast {:?} into {:?}.", t, raw),
@@ -284,7 +284,7 @@ pub fn cast(t: &Type, raw: RawType) -> Type {
             RawType::UInt => Type::UInt(*v as usize),
             RawType::UInt64 => Type::UInt64(*v as u64),
             RawType::UInt128 => Type::UInt128(*v as u128),
-            RawType::Char => Type::Char(*v as char),
+            RawType::Char => Type::Char(*v),
             RawType::String => Type::String(v.to_string()),
             _ => panic!("Cannot cast {:?} into {:?}.", t, raw),
         },
@@ -676,7 +676,7 @@ pub fn solve_2(op: &OpPrim2, t1: Type, t2: Type) -> Type {
             (Type::UInt64(v1), Type::UInt(v2)) => Type::UInt64(v1 << v2),
             (Type::UInt128(v1), Type::UInt(v2)) => Type::UInt128(v1 << v2),
             (Type::Char(v1), Type::UInt(v2)) => {
-                Type::Char(char::from_u32((v1 as u32) << (v2 as usize)).unwrap())
+                Type::Char(char::from_u32((v1 as u32) << v2).unwrap())
             }
             _ => panic!("ShiftLeft only works on an int number type and an UInt."),
         },
@@ -694,7 +694,7 @@ pub fn solve_2(op: &OpPrim2, t1: Type, t2: Type) -> Type {
             (Type::UInt64(v1), Type::UInt(v2)) => Type::UInt64(v1 >> v2),
             (Type::UInt128(v1), Type::UInt(v2)) => Type::UInt128(v1 >> v2),
             (Type::Char(v1), Type::UInt(v2)) => {
-                Type::Char(char::from_u32((v1 as u32) >> (v2 as usize)).unwrap())
+                Type::Char(char::from_u32((v1 as u32) >> v2).unwrap())
             }
             _ => panic!("ShiftRight only works on an int number type and an UInt."),
         },
