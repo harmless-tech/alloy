@@ -2,7 +2,7 @@ use std::{io, io::BufRead};
 
 use crate::{library::i_println, CrossHeap, StackFrame, Type};
 
-pub fn print_amt(arg: Type, stack_frame: &mut StackFrame, _heap: &CrossHeap) -> Type {
+pub fn print_amt(arg: Type, stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
     let amount = match arg {
         Type::UInt(i) => i,
         _ => panic!("std::printamt expects a uint in the register."),
@@ -16,7 +16,7 @@ pub fn print_amt(arg: Type, stack_frame: &mut StackFrame, _heap: &CrossHeap) -> 
     Type::None
 }
 
-pub fn read_all(_arg: Type, _stack_frame: &mut StackFrame, _heap: &CrossHeap) -> Type {
+pub fn read_all(_arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
     let mut buffer = String::new();
     let stdin = io::stdin();
     let handle = stdin.lock();

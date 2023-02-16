@@ -1,32 +1,16 @@
 use std::{
     collections::BTreeMap,
-    sync::{Arc, RwLock},
-    thread,
+    os::raw::c_void,
+    sync::{Arc, Mutex},
 };
 
 use allot_lib::Type;
 
-use crate::StackFrame;
-
-pub type CrossHeap = Arc<RwLock<Heap>>;
-
-/// HeapTypes can only be managed by function calls.
-#[derive(Debug)]
-pub enum HeapBox {
-    None,
-    Type(Box<Type>),
-    ThreadHandle(Box<thread::JoinHandle<(i32, StackFrame)>>),
-    // File
-    // Vec
-    // Tuple?
-    // HashSet
-    // HashMap
-    // TODO: Allow for custom heap types.
-}
+pub type CrossHeap = Arc<Mutex<Heap>>; // TODO: Each thread should handle its own heap, add a way to send info to other threads.
 
 #[derive(Debug, Default)]
 pub struct Heap {
-    heap: BTreeMap<usize, HeapBox>,
+    heap: BTreeMap<usize, *const c_void>,
     heap_pointer: usize,
 }
 impl Heap {
@@ -37,36 +21,37 @@ impl Heap {
         }
     }
 
-    pub fn push(&mut self, t: HeapBox) -> Type {
-        self.heap.insert(self.heap_pointer, t);
+    pub fn cross_new() -> CrossHeap {
+        Arc::new(Mutex::new(Heap::default()))
+    }
+
+    pub fn push<T>(&mut self, t: T) -> Type {
+        let raw = Box::into_raw(Box::new(t));
+        let ptr: *const c_void = unsafe { std::mem::transmute(raw) };
+
+        let i = self.heap_pointer;
         self.heap_pointer += 1;
 
-        Type::Pointer(self.heap_pointer - 1)
+        self.heap.insert(i, ptr);
+        Type::Pointer(i)
     }
 
-    pub fn get(&mut self, pointer: usize) -> &HeapBox {
-        match self.heap.get(&pointer) {
-            None => panic!(
-                "Tried to get an item on the heap at {pointer}, but there was nothing there."
-            ),
-            Some(item) => item,
-        }
-    }
-
-    pub fn get_mut(&mut self, pointer: usize) -> &mut HeapBox {
-        match self.heap.get_mut(&pointer) {
-            None => panic!(
-                "Tried to get_mut an item on the heap at {pointer}, but there was nothing there."
-            ),
-            Some(item) => item,
-        }
-    }
-
-    pub fn take(&mut self, pointer: usize) -> HeapBox {
+    // TODO: Need a way to type check?
+    pub fn take<T>(&mut self, pointer: usize) -> Box<T> {
         match self.heap.remove(&pointer) {
             None => panic!("Pointer does not point to anything in the heap."),
-            Some(i) => i,
+            Some(ptr) => {
+                let pointer: *mut T = unsafe { std::mem::transmute(ptr) };
+                unsafe { Box::from_raw(pointer) }
+            }
         }
+    }
+
+    pub fn update<T>(&mut self, pointer: usize, t: T) {
+        let raw = Box::into_raw(Box::new(t));
+        let ptr: *mut c_void = unsafe { std::mem::transmute(raw) };
+
+        self.heap.insert(pointer, ptr);
     }
 
     /// Frees the memory at the current pointer. Does nothing if the pointer points to nothing.
@@ -74,3 +59,4 @@ impl Heap {
         self.heap.remove(&pointer);
     }
 }
+unsafe impl Send for Heap {}
