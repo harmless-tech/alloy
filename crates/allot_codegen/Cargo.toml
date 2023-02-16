@@ -1,6 +1,6 @@
 [package]
 name = "allot_codegen"
-version = "0.0.2-alpha"
+version = "0.0.3-alpha"
 edition = "2021"
 authors = ["harmless-tech"]
 description = "Macros for allot"
@@ -12,12 +12,12 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-proc-macro2 = "1.0.47"
-quote = "1.0.21"
-syn = "1.0.103"
+proc-macro2 = "1.0.51"
+quote = "1.0.23"
+syn = "1.0.107"
 
 [dev-dependencies]
-num_enum = "0.5.7"
+num_enum = "0.5.9"
 
 [lib]
 proc-macro = true

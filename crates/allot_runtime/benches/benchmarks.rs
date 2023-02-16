@@ -7,6 +7,9 @@ use allot_lib::{
 };
 use allot_runtime::AllotRuntime;
 use criterion::{criterion_group, criterion_main, Criterion};
+use mimalloc::MiMalloc;
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 fn copy_speed(c: &mut Criterion) {
     // mimalloc no guard: [350.41 ns 350.56 ns 350.75 ns]
