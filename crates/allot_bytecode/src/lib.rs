@@ -12,7 +12,8 @@ mod gen;
 #[cfg(feature = "parse")]
 mod parse;
 
-/// For now the layout of allot files the BYTECODE_VERSION, then just a linear list of instructions.
+/// For now the layout of allot files the BYTECODE_VERSION, then just a linear
+/// list of instructions.
 // TODO: Allow some data about the program to be stored.
 
 pub const BYTECODE_VERSION: usize = 0;

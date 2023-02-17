@@ -249,7 +249,8 @@ impl AllotRuntime {
                 self.stack_frames.push(ret.1);
             }
             Instruction::Assert(reg, t) => {
-                // TODO: This is a kinda icky way to do this. Maybe check type first, then do Equal?
+                // TODO: This is a kinda icky way to do this. Maybe check type first, then do
+                // Equal?
                 let val = self.registers.clone(*reg);
                 let result = operations::solve_2(&OpPrim2::Equal, val, t.clone());
                 if let Type::Boolean(b) = result {

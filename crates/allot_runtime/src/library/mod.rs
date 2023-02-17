@@ -65,7 +65,8 @@ pub fn call(
 }
 
 // Library functions
-//fn template(args: LibraryRegisters, stack_frame: &mut StackFrame, heap: &mut CrossHeap) -> LibraryReturn {}
+//fn template(args: LibraryRegisters, stack_frame: &mut StackFrame, heap: &mut
+// CrossHeap) -> LibraryReturn {}
 
 fn exit(
     args: LibraryRegisters,

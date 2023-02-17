@@ -15,29 +15,34 @@ pub enum Instruction {
 
     /// Moves the value in the second register to the first register.
     Mov(Register, Type),
-    /// Copies the value in the second register and puts it in the first register.
-    /// Cpy may be faster than move when the amount of data is small.
+    /// Copies the value in the second register and puts it in the first
+    /// register. Cpy may be faster than move when the amount of data is
+    /// small.
     Cpy(Register, Register),
 
     /// Attempts the cast the value in the register to another type.
     Cast(Register, RawType),
 
-    /// Loads an address value into the register. (Could be simulated by using Mov)
+    /// Loads an address value into the register. (Could be simulated by using
+    /// Mov)
     Lea(Register, usize),
     /// Jumps to a label, depending on the value in the register.
     Jmp(Option<Register>, Type), // Type = Address || Register
     /// Pops the stack and jumps to that label.
     Ret,
 
-    /// Calls a function, functions get access to the current stack frame, read-only access to register 9, write-only access to register 10, and access to the heap.
+    /// Calls a function, functions get access to registers 5-9, the current
+    /// stack frame, and access to the heap.
     Call(String),
 
     /// Exits the program with the int. (Does nothing on threads currently)
     Exit(Type), // Type = Int32 | Register
 
-    /// Pushes the value in the register onto the stack in the current stack frame.
+    /// Pushes the value in the register onto the stack in the current stack
+    /// frame.
     Push(Register),
-    /// Pushes a copy of the value in the register onto the stack in the current stack frame.
+    /// Pushes a copy of the value in the register onto the stack in the current
+    /// stack frame.
     PushCpy(Register),
     /// Pops the value on top of the stack into register or gets rid of it.
     Pop(Option<Register>),
@@ -56,15 +61,18 @@ pub enum Instruction {
     /// May fail if the current stack frame is isolated.
     GiveTo,
 
-    /// Takes the current stack frame (Errors if it is the root stack frame) and runs it on a new thread starting at the label.
-    /// Threads have their own registers and stack frames, the heap is shared between all threads.
-    /// Puts its handle into register 0.
+    /// Takes the current stack frame (Errors if it is the root stack frame) and
+    /// runs it on a new thread starting at the label. Threads have their
+    /// own registers and stack frames, the heap is shared between all threads.
+    /// Puts its handle into register 5.
     /// To stop the thread use Instruction::Exit.
     ThreadCreate(Type), // Type = Address || Register
-    /// Joins a thread and pushes its stack frame. Accepts a pointer to its join handle.
-    /// Puts the i32 return value into register 0, pushes the StackFrame from the thread.
+    /// Joins a thread and pushes its stack frame. Accepts a pointer to its join
+    /// handle. Puts the i32 return value into register 5, pushes the
+    /// StackFrame from the thread.
     ThreadJoin(Register),
-    /// Asserts that a register is equal to a type. Should only be used in debug builds of your allot program.
+    /// Asserts that a register is equal to a type. Should only be used in debug
+    /// builds of your allot program.
     Assert(Register, Type),
 
     /// Prints a register. (Debug builds only)
