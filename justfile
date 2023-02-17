@@ -51,5 +51,8 @@ pkg PACKAGE:
     #cargo publish --dry-run --allow-dirty --no-verify -p {{PACKAGE}}
     cargo package --list --allow-dirty --no-verify -p {{PACKAGE}}
 
+# Does not work on windows!
 prg NAME:
-    cargo run --release -- --run ./crates/allot_asm/programs/{{NAME}}.ala
+    cargo build --release
+    time ./target/release/allot --asm ./crates/allot_asm/programs/{{NAME}}.ala
+    time ./target/release/allot --run ./crates/allot_asm/programs/{{NAME}}.ala
