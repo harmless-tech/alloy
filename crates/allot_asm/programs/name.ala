@@ -1,27 +1,25 @@
 ;; name - harmless-tech
 ;; Gets a first and last name and prints them out.
-mov r9 str(First name: ) ; First
+mov r5 str(First name: ) ; First
 call (print)
 call (read_line)
-cpy r9 r10
 call (string::trim)
-cpy r20 r10
+cpy r0 r5
 
-mov r9 str(Last name: ) ; Last
+mov r5 str(Last name: ) ; Last
 call (print)
 call (read_line)
-cpy r9 r10
 call (string::trim)
 
-mov r22 str( ) ; Combine
-op + r20 r22
-op + r20 r10
+mov r1 str( ) ; Combine
+op + r0 r1
+op + r0 r5
 
-mov r9 str(Your name is ); Print
+mov r5 str(Your name is ); Print
 call (print)
-cpy r9 r20
+cpy r5 r0
 call (print)
-mov r9 str(!)
+mov r5 str(!)
 call (println)
 
 exit i32(0)

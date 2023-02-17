@@ -1,5 +1,3 @@
-mod args;
-
 use std::fs;
 
 use allot_runtime::AllotRuntime;
@@ -7,6 +5,8 @@ use anyhow::Result;
 use clap::Parser;
 #[cfg(feature = "mimalloc")]
 use mimalloc::MiMalloc;
+
+mod args;
 
 #[cfg(feature = "mimalloc")]
 #[global_allocator]

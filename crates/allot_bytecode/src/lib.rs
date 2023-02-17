@@ -1,8 +1,3 @@
-#[cfg(feature = "gen")]
-mod gen;
-#[cfg(feature = "parse")]
-mod parse;
-
 use std::mem::size_of;
 
 #[cfg(feature = "forms")]
@@ -11,6 +6,11 @@ pub use forms::*;
 pub use gen::gen;
 #[cfg(feature = "parse")]
 pub use parse::parse;
+
+#[cfg(feature = "gen")]
+mod gen;
+#[cfg(feature = "parse")]
+mod parse;
 
 /// For now the layout of allot files the BYTECODE_VERSION, then just a linear list of instructions.
 // TODO: Allow some data about the program to be stored.

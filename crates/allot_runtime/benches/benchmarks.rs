@@ -8,6 +8,7 @@ use allot_lib::{
 use allot_runtime::AllotRuntime;
 use criterion::{criterion_group, criterion_main, Criterion};
 use mimalloc::MiMalloc;
+
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 

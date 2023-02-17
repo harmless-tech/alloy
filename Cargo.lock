@@ -60,6 +60,7 @@ dependencies = [
 name = "allot_runtime"
 version = "0.0.3-alpha"
 dependencies = [
+ "allot_codegen",
  "allot_lib",
  "criterion",
  "mimalloc",

@@ -26,6 +26,10 @@ proc-macro = true
 name = "raw_enum"
 path = "tests/raw_enum.rs"
 
+[[test]]
+name = "lib_return"
+path = "tests/lib_return.rs"
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--document-private-items"]

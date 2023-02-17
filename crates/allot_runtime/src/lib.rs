@@ -1,5 +1,7 @@
 use std::{sync::Arc, thread::JoinHandle};
 
+#[doc(hidden)]
+pub use allot_lib::*;
 use allot_lib::{Instruction, Register, Type};
 
 use crate::memory::{CrossHeap, Heap, Registers, StackFrame};
@@ -7,9 +9,6 @@ use crate::memory::{CrossHeap, Heap, Registers, StackFrame};
 mod library;
 mod memory;
 mod operations;
-
-#[doc(hidden)]
-pub use allot_lib::*;
 
 pub struct AllotRuntime {
     pub current: usize,
@@ -114,14 +113,39 @@ impl AllotRuntime {
                 }
             }
             Instruction::Call(function) => {
-                let r9 = self.registers.clone(Register::R9);
                 let stack_frame = self
                     .stack_frames
                     .last_mut()
                     .expect("There was no stack frame to take.");
 
-                let ret = library::call(function.as_str(), r9, stack_frame, &mut self.heap);
-                self.registers.insert(Register::R10, ret);
+                let ret = library::call(
+                    function.as_str(),
+                    (
+                        self.registers.get(Register::R5),
+                        self.registers.get(Register::R6),
+                        self.registers.get(Register::R7),
+                        self.registers.get(Register::R8),
+                        self.registers.get(Register::R9),
+                    ),
+                    stack_frame,
+                    &mut self.heap,
+                );
+
+                if let Some(t) = ret.0 {
+                    self.registers.insert(Register::R5, t)
+                }
+                if let Some(t) = ret.1 {
+                    self.registers.insert(Register::R6, t)
+                }
+                if let Some(t) = ret.2 {
+                    self.registers.insert(Register::R7, t)
+                }
+                if let Some(t) = ret.3 {
+                    self.registers.insert(Register::R8, t)
+                }
+                if let Some(t) = ret.4 {
+                    self.registers.insert(Register::R9, t)
+                }
             }
             Instruction::Exit(t) => {
                 let code = AllotRuntime::get_int32(t, &mut self.registers);
@@ -207,7 +231,7 @@ impl AllotRuntime {
                     let mut heap = self.heap.lock().unwrap();
                     heap.push(handle)
                 };
-                self.registers.insert(Register::R0, i);
+                self.registers.insert(Register::R5, i);
             }
             Instruction::ThreadJoin(reg) => {
                 let pointer = match self.registers.get(*reg) {
@@ -221,7 +245,7 @@ impl AllotRuntime {
                 };
 
                 let ret = handle.join().expect("Fatal error on thread join.");
-                self.registers.insert(Register::R0, Type::Int32(ret.0));
+                self.registers.insert(Register::R5, Type::Int32(ret.0));
                 self.stack_frames.push(ret.1);
             }
             Instruction::Assert(reg, t) => {
