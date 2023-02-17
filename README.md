@@ -13,3 +13,9 @@ Then to see options:
 ```shell
 allot --help
 ```
+
+### Making programs
+
+Right now the only way to make programs for Allot is to use allot_asm. However, allot_asm is currently very janky 
+(since it is basically just a text representation of allot bytecode) and does not currently come with any documentation.
+There are examples you can make sense of though under crates/allot_asm/programs.
