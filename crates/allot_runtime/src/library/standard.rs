@@ -1,22 +1,35 @@
 use std::{io, io::BufRead};
 
-use crate::{library::i_println, CrossHeap, StackFrame, Type};
+use allot_codegen::lib_return;
 
-pub fn print_amt(arg: Type, stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
-    let amount = match arg {
+use crate::{
+    library::{i_println, LibraryRegisters, LibraryReturn},
+    CrossHeap, StackFrame, Type,
+};
+
+pub fn print_amt(
+    args: LibraryRegisters,
+    stack_frame: &mut StackFrame,
+    _heap: &mut CrossHeap,
+) -> LibraryReturn {
+    let amount = match args.0 {
         Type::UInt(i) => i,
         _ => panic!("std::printamt expects a uint in the register."),
     };
 
-    for i in 0..amount {
+    for i in 0..*amount {
         let t = stack_frame.clone_offset(i);
-        i_println(t);
+        i_println(&t);
     }
 
-    Type::None
+    lib_return!()
 }
 
-pub fn read_all(_arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
+pub fn read_all(
+    _args: LibraryRegisters,
+    _stack_frame: &mut StackFrame,
+    _heap: &mut CrossHeap,
+) -> LibraryReturn {
     let mut buffer = String::new();
     let stdin = io::stdin();
     let handle = stdin.lock();
@@ -26,5 +39,5 @@ pub fn read_all(_arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap
         buffer.push_str(line.as_str());
     }
 
-    Type::String(buffer)
+    lib_return!(Type::String(buffer))
 }

@@ -1,18 +1,27 @@
 // TODO: Allow optional libraries, like gui? (wasm plugins?)
 
-mod standard;
-mod thread;
-
 use std::{
     io,
     io::{BufRead, Read, Write},
 };
 
+use allot_codegen::lib_return;
 use phf::phf_map;
 
 use crate::{CrossHeap, StackFrame, Type};
 
-type LibraryFunction = fn(Type, &mut StackFrame, &mut CrossHeap) -> Type;
+mod standard;
+mod thread;
+
+type LibraryRegisters<'a> = (&'a Type, &'a Type, &'a Type, &'a Type, &'a Type);
+type LibraryReturn = (
+    Option<Type>,
+    Option<Type>,
+    Option<Type>,
+    Option<Type>,
+    Option<Type>,
+);
+type LibraryFunction = fn(LibraryRegisters, &mut StackFrame, &mut CrossHeap) -> LibraryReturn;
 
 static FUNCTIONS: phf::Map<&'static str, LibraryFunction> = phf_map! {
     // Control
@@ -41,23 +50,33 @@ static FUNCTIONS: phf::Map<&'static str, LibraryFunction> = phf_map! {
     //TODO Allow RawTypes as type? Or just use a UInt to convert.
 };
 
-pub fn call(function: &str, arg: Type, stack_frame: &mut StackFrame, heap: &mut CrossHeap) -> Type {
+pub fn call(
+    function: &str,
+    args: LibraryRegisters,
+    stack_frame: &mut StackFrame,
+    heap: &mut CrossHeap,
+) -> LibraryReturn {
     let f = match FUNCTIONS.get(function) {
         None => panic!("Tried to call a function that does not exist."),
         Some(func) => func,
     };
 
-    f(arg, stack_frame, heap)
+    f(args, stack_frame, heap)
 }
 
 // Library functions
-//fn template(arg: Type, stack_frame: &mut StackFrame, heap: &mut CrossHeap) -> Type {}
+//fn template(args: LibraryRegisters, stack_frame: &mut StackFrame, heap: &mut
+// CrossHeap) -> LibraryReturn {}
 
-fn exit(arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
-    let code = match arg {
-        Type::Int32(v) => v,
+fn exit(
+    args: LibraryRegisters,
+    _stack_frame: &mut StackFrame,
+    _heap: &mut CrossHeap,
+) -> LibraryReturn {
+    let code = match args.0 {
+        Type::Int32(v) => *v,
         _ => {
-            i_println(arg);
+            i_println(args.0);
             0
         }
     };
@@ -65,8 +84,12 @@ fn exit(arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type
     std::process::exit(code);
 }
 
-fn print(arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
-    match arg {
+fn print(
+    args: LibraryRegisters,
+    _stack_frame: &mut StackFrame,
+    _heap: &mut CrossHeap,
+) -> LibraryReturn {
+    match args.0 {
         Type::None => print!(""),
         Type::Int8(v) => print!("{}", v),
         Type::Int16(v) => print!("{}", v),
@@ -92,16 +115,20 @@ fn print(arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Typ
 
     io::stdout().flush().unwrap();
 
-    Type::None
+    lib_return!()
 }
 
-fn println(arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
-    i_println(arg);
-    Type::None
+fn println(
+    args: LibraryRegisters,
+    _stack_frame: &mut StackFrame,
+    _heap: &mut CrossHeap,
+) -> LibraryReturn {
+    i_println(args.0);
+    lib_return!()
 }
 
 #[inline]
-fn i_println(arg: Type) {
+fn i_println(arg: &Type) {
     match arg {
         Type::None => println!(),
         Type::Int8(v) => println!("{}", v),
@@ -127,7 +154,11 @@ fn i_println(arg: Type) {
     }
 }
 
-fn read(_arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
+fn read(
+    _args: LibraryRegisters,
+    _stack_frame: &mut StackFrame,
+    _heap: &mut CrossHeap,
+) -> LibraryReturn {
     let mut buffer = [0_u8; 1];
     let stdin = io::stdin();
     let mut handle = stdin.lock();
@@ -136,10 +167,14 @@ fn read(_arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Typ
         .read_exact(&mut buffer)
         .expect("Failed to read a byte from stdin.");
 
-    Type::UInt8(buffer[0])
+    lib_return!(Type::UInt8(buffer[0]))
 }
 
-fn read_line(_arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
+fn read_line(
+    _args: LibraryRegisters,
+    _stack_frame: &mut StackFrame,
+    _heap: &mut CrossHeap,
+) -> LibraryReturn {
     let mut buffer = String::new();
     let stdin = io::stdin();
     let mut handle = stdin.lock();
@@ -148,24 +183,34 @@ fn read_line(_arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -
         .read_line(&mut buffer)
         .expect("Failed to read line from stdin.");
 
-    Type::String(buffer)
+    lib_return!(Type::String(buffer))
 }
 
-fn impl_heap_free(arg: Type, _stack_frame: &mut StackFrame, heap: &mut CrossHeap) -> Type {
-    match arg {
+fn impl_heap_free(
+    args: LibraryRegisters,
+    _stack_frame: &mut StackFrame,
+    heap: &mut CrossHeap,
+) -> LibraryReturn {
+    match args.0 {
         Type::Pointer(p) => {
             let mut handle = heap.lock().unwrap();
-            handle.free(p);
+            handle.free(*p);
         }
         _ => panic!("heap::free expects a pointer."),
     }
 
-    Type::None
+    lib_return!()
 }
 
-fn impl_string_trim(arg: Type, _stack_frame: &mut StackFrame, _heap: &mut CrossHeap) -> Type {
-    match arg {
+fn impl_string_trim(
+    args: LibraryRegisters,
+    _stack_frame: &mut StackFrame,
+    _heap: &mut CrossHeap,
+) -> LibraryReturn {
+    let ret = match args.0 {
         Type::String(v) => Type::String(String::from(v.trim())),
-        _ => panic!("string::trim expects a string in register 9."),
-    }
+        _ => panic!("string::trim expects a string."),
+    };
+
+    lib_return!(ret)
 }

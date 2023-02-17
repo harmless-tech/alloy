@@ -1,6 +1,8 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::{Data, DeriveInput, Ident};
+use syn::{parse_quote, Data, DeriveInput, Expr, Ident};
+
+use crate::structs::LibReturnMacroInput;
 
 pub fn raw_enum(input: DeriveInput) -> TokenStream {
     let fields = match input.data {
@@ -57,5 +59,26 @@ pub fn raw_enum(input: DeriveInput) -> TokenStream {
         pub enum #name {
             #(#ids)*
         }
+    }
+}
+
+pub fn lib_return(input: LibReturnMacroInput) -> TokenStream {
+    if input.0.len() > 5 {
+        panic!("lib_return macro only allows for up to 5 inputs.");
+    }
+
+    let mut vec: Vec<Expr> = vec![parse_quote!(None); 5];
+    for (i, e) in input.0.iter().enumerate() {
+        vec[i] = parse_quote!(Some(#e));
+    }
+
+    let fields = vec.into_iter().map(|v| {
+        quote! {
+            #v,
+        }
+    });
+
+    quote! {
+        return (#(#fields)*)
     }
 }

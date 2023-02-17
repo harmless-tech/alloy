@@ -6,7 +6,8 @@ use std::{
 
 use allot_lib::Type;
 
-pub type CrossHeap = Arc<Mutex<Heap>>; // TODO: Each thread should handle its own heap, add a way to send info to other threads.
+pub type CrossHeap = Arc<Mutex<Heap>>; // TODO: Each thread should handle its own heap, add a way to send info to other
+                                       // threads.
 
 #[derive(Debug, Default)]
 pub struct Heap {
@@ -54,7 +55,8 @@ impl Heap {
         self.heap.insert(pointer, ptr);
     }
 
-    /// Frees the memory at the current pointer. Does nothing if the pointer points to nothing.
+    /// Frees the memory at the current pointer. Does nothing if the pointer
+    /// points to nothing.
     pub fn free(&mut self, pointer: usize) {
         self.heap.remove(&pointer);
     }
