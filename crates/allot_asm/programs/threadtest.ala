@@ -1,0 +1,26 @@
+;; threadtest - harmless-tech
+;; Tests multi threading
+pushframe (false) ; Create second thread.
+mov r9 str(This is for thread 2.)
+push r9
+threadcreate add(17)
+cpy r15 r0
+
+mov r9 str(Thread 1)
+call (println)
+mov r9 u64(1000) ; Put this thread to sleep for a bit.
+call (thread::sleep)
+mov r9 str(Thread 1)
+call (println)
+call (println)
+threadjoin r15 ; Wait for second thread
+call (println)
+cpy r9 r0
+call (println)
+
+exit i32(0)
+
+; Thread
+pop r9
+call (println)
+exit i32(101)
