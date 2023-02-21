@@ -1,0 +1,30 @@
+;; This is an example of what the next-gen of allot asm should look like.
+; This would be section 0
+#resource IMPORTED_FILE FILE:example.txt      ; Import the entire file as bytes and add it to the resources bundled with this application.
+#resource FIRST_LETTER FILE[0, 1]:example.txt ; Import in bytes the first letter of the file.
+#resource IMPORTED_BYTES BYTES:This           ; Import bytes.
+#resource STATIC_TYPE TYPE:str(String time!)  ; Allow this type to be loaded into a register.
+load r0 IMPORTED_FILE  ; Loads the IMPORTED_FILE resource into the heap as a byte array and then puts the pointer into register 0.
+load r0 IMPORTED_BYTES ; Loads the IMPORTED_BYTES resource into the heap as a byte array and then puts the pointer into register 0.
+load r0 STATIC_TYPE    ; Loads the string into register 0.
+
+; The ! is used to mark unsafe instructions that may fail in different enviroments.
+; For example the current idea for chunkload would fail in webassembly enviroments.
+!chunkload u32(2)   ; Imports the second chunk into the Allot runtime.
+                    ; However this is only for the current thread. Any threads spawned after this will
+                    ; also contain the second chunk.
+!chunkunload u32(2) ; Removes the second chunk into the Allot runtime, for the current thread only.
+
+; All types should be clear.
+pushframe bool(false) ; Instead of "pushframe (false)"
+
+; TODO: Way to handle stack and stackframes better. See issue #19.
+
+jmp add(:FIB::START)
+exit i32(12)
+
+---2
+; This would be chunk 2 (Each section can hold up to u32::MAX instructions)
+#include fib.ala ; Imports fib.ala into this file.
+                 ; It is important to be careful however since labels are unchanged when imported.
+                 ; So if you use the label :FIB::LOOP then it would conflict.
