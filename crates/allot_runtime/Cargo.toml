@@ -20,6 +20,10 @@ phf = { version = "0.11.1", features = ["macros"] }
 criterion = "0.4.0"
 mimalloc = { version = "0.1.34", default-features = false }
 
+[features]
+default = []
+fast-math = []
+
 [[test]]
 name = "tests"
 path = "tests/runtime.rs"

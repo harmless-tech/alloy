@@ -2,6 +2,22 @@ use allot_lib::{OpPrim1, OpPrim2, Operation, RawType, Register, Type};
 
 use crate::memory::Registers;
 
+// TODO: Possible add functions
+#[cfg(feature = "fast-math")]
+mod math {
+    fn add(a: usize, b: usize) -> Option<usize> {
+        Some(a + b)
+    }
+}
+
+#[cfg(not(feature = "fast-math"))]
+mod math {
+    fn add(a: usize, b: usize) -> Option<usize> {
+        a.checked_add(b)
+    }
+}
+//
+
 // TODO: Should casting be allowed for NUMBER->String or should that be a
 // library function?
 pub fn cast(t: &Type, raw: RawType) -> Type {
