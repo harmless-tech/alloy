@@ -1,11 +1,11 @@
-.idea/
 .fleet/
+.idea/
+.nova/
 .vscode/
-.vs/
+.zed/
 
-/target
+.zig-cache/
+zig-out/
 
-.DS_Store
 *.tmp
-
-*.allot
+.DS_Store
