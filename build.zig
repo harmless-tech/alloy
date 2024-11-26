@@ -78,6 +78,19 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(lib);
 
+    const dylib = b.addSharedLibrary(.{
+        .name = name,
+        .root_source_file = b.path("src/lib.zig"),
+        .target = target,
+        .optimize = optimize,
+        .strip = strip,
+    });
+    for (modules) |module| {
+        dylib.root_module.addImport(module[0], module[1]);
+    }
+
+    b.installArtifact(dylib);
+
     const exe = b.addExecutable(.{
         .name = name,
         .root_source_file = b.path("src/main.zig"),
