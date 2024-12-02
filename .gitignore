@@ -6,6 +6,11 @@
 
 .zig-cache/
 zig-out/
+repl.tmp.zig
 
+tmp/
+temp/
+*.temp
 *.tmp
+
 .DS_Store

@@ -1,13 +1,14 @@
+pub const allot = @import("allot");
+pub const aasm = @import("allot_asm");
+pub const abytecode = @import("allot_bytecode");
+pub const aruntime = @import("allot_runtime");
+pub const astd = @import("allot_std");
+
 const std = @import("std");
 const testing = std.testing;
 
-const bytecode = @import("allot_bytecode");
-const runtime = @import("allot_runtime");
+test "all in module" {
+    // _ = @import(".zig");
 
-pub fn add(a: i32, b: i32) i32 {
-    return a + b;
-}
-
-test "basic add functionality" {
-    try testing.expect(add(3, 7) == 10);
+    std.testing.refAllDeclsRecursive(@This());
 }

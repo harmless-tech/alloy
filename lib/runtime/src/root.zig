@@ -1,6 +1,8 @@
-const bytecode = @import("allot_bytecode");
+const std = @import("std");
+const testing = std.testing;
 
-pub fn sub(a: i32, b: i32) i32 {
-    bytecode.trytry();
-    return a - b;
+test "all in module" {
+    // _ = @import(".zig");
+
+    std.testing.refAllDeclsRecursive(@This());
 }

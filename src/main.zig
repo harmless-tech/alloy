@@ -1,14 +1,13 @@
 const std = @import("std");
+const testing = std.testing;
 
-const liballot = @import("lib.zig");
+const liballot = @import("liballot");
 const allot = liballot.allot;
-const runtime = liballot.runtime;
+const bytecode = liballot.abytecode;
 
 pub fn main() !void {
     // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
     std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
-
-    std.debug.print("All your {}.\n", .{allot.add(1, 2)});
 
     // stdout is for the actual output of your application, for example if you
     // are implementing gzip, then only the compressed bytes should be sent to
@@ -17,12 +16,28 @@ pub fn main() !void {
     var bw = std.io.bufferedWriter(stdout_file);
     const stdout = bw.writer();
 
-    _ = allot.add(1, 2);
-    _ = runtime.sub(1, 2);
-
     try stdout.print("Run `zig build test` to run the tests.\n", .{});
 
     try bw.flush(); // don't forget to flush!
+
+    // const uint: u32 = 0xFFAA3490;
+    // const i: bytecode.Instruction = @bitCast(uint);
+    // std.debug.print("WTF is {}\n", .{ i.b0 });
+
+    // const instruct: bytecode.Instruction = .{
+    //     .b3 = 0xFF,
+    //     .b2 = 0xAA,
+    //     .b1 = 0x34,
+    //     .b0 = 0x90,
+    // };
+    // const uii: u32 = @bitCast(instruct);
+    // std.debug.print("WTF is {}\n", .{ uii });
+}
+
+test "all in module" {
+    // _ = @import(".zig");
+
+    std.testing.refAllDeclsRecursive(@This());
 }
 
 test "simple test" {
@@ -30,5 +45,4 @@ test "simple test" {
     defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
     try list.append(42);
     try std.testing.expectEqual(@as(i32, 42), list.pop());
-    try std.testing.expect(allot.add(1, 2) == 3);
 }
